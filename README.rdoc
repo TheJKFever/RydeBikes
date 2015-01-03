@@ -1,0 +1,7 @@
+== RYDE
+
+Application to bring local bike share to college campuses
+
+* version
+Rails 4.2.0
+ruby 2.0.0p481 (2014-05-08 revision 45883) [universal.x86_64-darwin14]
