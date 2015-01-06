@@ -41,6 +41,9 @@ gem 'oauth2'
 # Facebook Authentication
 gem 'omniauth-facebook', '1.4.0'
 
+# geolocation
+gem 'geocoder'
+
 group :development, :test do
   gem 'sqlite3'
 

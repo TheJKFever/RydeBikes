@@ -5,6 +5,7 @@ class AddNetworkAndPictureToUser < ActiveRecord::Migration
   		t.string :domain
   	end
 
+  	add_column :bikes, :network_id, :integer  	
   	add_column :users, :network_id, :integer
   	add_column :users, :picture, :string
   end

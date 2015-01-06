@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
-  root to: 'home#index'
-  
+  devise_for :admins
   devise_for :users, :only => :omniauth_callbacks 
+
+  root to: 'home#login'
+  get 'bikes' => 'bikes#index', as: :home
+  
   get '/users/auth/:provider/callback' => 'authentication#create', via: [:get, :post]
   get '/auth/:provider/signout' => 'authentication#signout', via: [:get, :post]
 
