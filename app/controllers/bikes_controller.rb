@@ -42,11 +42,11 @@ class BikesController < ApplicationController
   end
 
   private
-    def set_bike
-      @bike = Bike.find(params[:id])
-    end
+  def set_bike
+    @bike = Bike.find(params[:id])
+  end
 
-    def bike_params
-      params.require(:bike).permit(:status, :model, :network => [:name], :location => [:latitude, :longitude])
-    end
+  def bike_params
+    params.require(:bike).permit(:status, :model, :network => [:name], :location => [:latitude, :longitude])
+  end
 end
