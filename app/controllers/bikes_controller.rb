@@ -47,7 +47,6 @@ class BikesController < ApplicationController
     end
 
     def bike_params
-      params.require(:bike)
-      .permit(:status, :model, :network => [:name], :location => [:latitude, :longitude])
+      params.require(:bike).permit(:status, :model, :network => [:name], :location => [:latitude, :longitude])
     end
 end
