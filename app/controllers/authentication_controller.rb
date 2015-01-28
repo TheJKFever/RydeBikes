@@ -1,4 +1,11 @@
 class AuthenticationController < ApplicationController
+  def create
+    puts params
+    if params[:provider] == "facebook"
+      signin_fb
+    end
+  end
+
   def signin_fb
     auth = request.env['omniauth.auth']
     # Request a new 60 day token using the current 2 hour token obtained from fb, why not
@@ -12,16 +19,17 @@ class AuthenticationController < ApplicationController
       user = authentication.user
     else
       # use email to see if already registered, if not create new user
-      user = find_or_initialize_by_email(auth['info']['email'].downcase)
+      user = User.find_or_initialize_by(email: auth['info']['email'].downcase)
       user.apply_omniauth(auth) # builds authentication object for user
     end
-    saved_status = user.save(false)
+    saved_status = user.save(:validate=> false)
 
     # Add the new token and expiration date to the user's session
     create_or_refresh_fb_session(auth)
 
     if (saved_status)
       user = authentication ? authentication.user : user
+      puts session
       sign_in_and_redirect(:user, user)
     else # could not save unvalidated user... 
       render :json => { :errors => user.errors.messages }
@@ -48,6 +56,13 @@ class AuthenticationController < ApplicationController
     create_or_refresh_fb_session(auth)
 
     render :json => { :success => saved_status }
+  end
+
+  def destroy
+    puts params
+    if params[:provider] == "facebook"
+      signout_fb
+    end
   end
 
   def signout_fb
