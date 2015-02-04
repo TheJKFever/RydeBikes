@@ -1,20 +1,24 @@
 class BikesController < ApplicationController
-  before_filter :authenticate_user!, except: [:show, :reserve]
+  before_filter :authenticate_user!, except: [:show, :reserve, :index] # TODO: change this back and use API authentication instead
 	before_filter :authenticate_admin!, except: [:index, :show, :reserve]
   before_action :set_bike, except: [:index, :create]
 
   respond_to :json
 
   def index # returns all bikes within a certain radius
-    # defaults raius to half mile, and coordinate to requesting ip address
-    radius = params[:radius] ? params[:radius] : 0.5
-    coordinates = params[:coordinates] ? params[:coordinates] : request.location
-    @bikes = Coordinate.near(coordinates, radius).joins(:bikes)
-    respond_with(@bikes)
+
+    ## TODO: use coordinates later, when more campuses and bikes.
+    # # defaults radius to half mile, and coordinate to requesting ip address
+    # radius = params[:radius] ? params[:radius] : 0.5
+    # coordinates = params[:coordinates] ? params[:coordinates] : request.location
+    # puts coordinates
+    # @bikes = Coordinate.near(coordinates, radius).joins(:bikes)
+    @bikes = Bike.all
+    render json: @bikes
   end
 
   def show
-    respond_with(@bike)
+    render json: @bike
   end
 
   def new
