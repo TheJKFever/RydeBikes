@@ -1,7 +1,7 @@
 class BikesController < ApplicationController
-  before_filter :authenticate_user!
-	before_filter :authenticate_admin!, :except => [:index, :show]
-  before_action :set_bike, only: [:show, :edit, :update, :destroy]
+  before_filter :authenticate_user!, except: [:show, :reserve]
+	before_filter :authenticate_admin!, except: [:index, :show, :reserve]
+  before_action :set_bike, except: [:index, :create]
 
   respond_to :json
 
@@ -39,6 +39,15 @@ class BikesController < ApplicationController
   def destroy
     @bike.destroy
     respond_with(@bike)
+  end
+
+  def reserve 
+    # TODO: pass in user
+    # 
+    @bike.status = Bike.status[:reserved]
+    @bike.save
+    @ride = Ride.create(bike_id: @bike.id, start_location: @bike.location, start_time: DateTime.now, status: Ride.status[:progress])
+    respond_with(@ride)
   end
 
   private

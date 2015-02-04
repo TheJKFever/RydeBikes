@@ -1,4 +1,9 @@
 <p id="connect">
-  <a class="signin-fb" href="#">Signin</a>
-  <a class="signout" href="#">Signout</a>
+	<% if !signed_in? %>
+		<%= link_to "Sign up", new_user_registration_path, class: "signup-devise" %>
+		<%= link_to "Sign in", new_user_session_path, class: "signin-devise" %>
+		<a class="signin-fb" href="#">Sign in with facebook</a>
+	<% else %>
+		<a class="signout" href="#">Sign out</a>
+	<% end %>
 </p>
