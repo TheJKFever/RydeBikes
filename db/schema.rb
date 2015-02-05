@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150106002201) do
+ActiveRecord::Schema.define(version: 20150204233546) do
 
   create_table "addresses", force: :cascade do |t|
     t.string   "street"
@@ -52,8 +52,10 @@ ActiveRecord::Schema.define(version: 20150106002201) do
   end
 
   create_table "coordinates", force: :cascade do |t|
-    t.float "latitude"
-    t.float "longitude"
+    t.float  "latitude"
+    t.float  "longitude"
+    t.string "name"
+    t.string "full_address"
   end
 
   create_table "networks", force: :cascade do |t|
@@ -62,11 +64,14 @@ ActiveRecord::Schema.define(version: 20150106002201) do
   end
 
   create_table "payments", force: :cascade do |t|
-    t.string   "authentication_token"
     t.integer  "user_id"
     t.string   "payment_type"
-    t.datetime "created_at",           null: false
-    t.datetime "updated_at",           null: false
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+    t.string   "last4"
+    t.integer  "exp_month"
+    t.integer  "exp_year"
+    t.string   "stripe_customer_id"
   end
 
   create_table "payments_users", id: false, force: :cascade do |t|
@@ -84,7 +89,6 @@ ActiveRecord::Schema.define(version: 20150106002201) do
     t.string   "status"
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
-    t.integer  "transaction_id"
   end
 
   add_index "rides", ["user_id", "status"], name: "index_rides_on_user_id_and_status"
@@ -94,6 +98,8 @@ ActiveRecord::Schema.define(version: 20150106002201) do
     t.string   "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "ride_id"
+    t.integer  "amount"
   end
 
   create_table "users", force: :cascade do |t|

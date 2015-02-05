@@ -1,11 +1,11 @@
 class RidesController < ApplicationController
-	before_filter :authenticate_user!
-	before_action :set_ride, only: [:show, :edit, :update, :destroy]
+	# before_filter :authenticate_user!
+	before_action :set_ride, only: [:show, :edit, :finish, :update, :destroy]
 
-	respond_to :html, :json
+	respond_to :json
 
 	def index # returns all rides methods for a particular user
-		@rides = Ride.find_by_user_id(current_user.id)
+		@rides = current_user.admin? Ride.all : Ride.find_by_user_id(current_user.id)
 		respond_with(@rides)
 	end
 
@@ -23,8 +23,17 @@ class RidesController < ApplicationController
 
 	def create
 		@ride = Ride.new(ride_params)
-		@ride.save
+		if @ride.save
+			@bike = @ride.bike
+			@bike.status = Bike.status[:reserved]
 		respond_with(@ride)
+	end
+
+	def finish
+		if @ride.update(ride_params)
+			@bike = @ride.bike
+			@bike.model = @ride.stop_location # TODO: change this to location (only for test 0)
+
 	end
 
 	def update

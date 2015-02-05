@@ -44,6 +44,9 @@ gem 'omniauth-facebook', '1.4.0'
 # geolocation
 gem 'geocoder'
 
+# adding bower for angular
+gem 'bower-rails'
+
 group :development, :test do
   gem 'sqlite3'
 
