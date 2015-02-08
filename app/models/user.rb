@@ -17,6 +17,7 @@ class User < ActiveRecord::Base
 	has_many :rides
 	has_many :authentications
 	belongs_to :network
+	has_one :api_key
 
 	def find_or_initialize_by_omniauth(auth)
 		user = find_or_initialize_by_email(auth['info']['email'])

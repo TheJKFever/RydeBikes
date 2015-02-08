@@ -3,13 +3,19 @@ Rails.application.routes.draw do
   devise_for :users #, :only => :omniauth_callbacks
 
   root to: 'home#index'
-  get 'bikes' => 'bikes#index', as: :home, :defaults => {:format => "json"}
+  get 'bikes' => 'bikes#index', defaults: {format: 'json'}, as: :home
   
+  # OAuth
   get '/users/auth/:provider/callback' => 'authentication#create', via: [:get, :post]
   get '/auth/:provider/signout' => 'authentication#destroy', via: [:get, :post]
 
-  resources :bikes, :defaults => {:format => "json"}
-  get '/bikes/reserve/:id' => 'bikes#reserve', :defaults => {:format => "json"}
+  resources :bikes, defaults: {format: 'json'}
+  get '/bikes/reserve/:id' => 'bikes#reserve', defaults: {format: 'json'}
+
+  namespace :api do
+    resources :bikes, defaults: {format: 'json'}
+    resources :rides, defaults: {format: 'json'}
+  end
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

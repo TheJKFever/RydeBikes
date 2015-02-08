@@ -1,55 +1,70 @@
 class RidesController < ApplicationController
-	# before_filter :authenticate_user!
+	before_filter :authenticate_user!
 	before_action :set_ride, only: [:show, :edit, :finish, :update, :destroy]
 
 	respond_to :json
 
 	def index # returns all rides methods for a particular user
 		@rides = current_user.admin? Ride.all : Ride.find_by_user_id(current_user.id)
-		respond_with(@rides)
+		render json: @rides
 	end
 
 	def show
-		respond_with(@ride)
+		render json: @ride
 	end
 
 	def new
 		@ride = Ride.new
-		respond_with(@ride)
+		render json: @ride
 	end
 
 	def edit
+		render json: @ride
 	end
 
-	def create
+	def create # Same exact method at bikes#reserve
 		@ride = Ride.new(ride_params)
 		if @ride.save
 			@bike = @ride.bike
-			@bike.status = Bike.status[:reserved]
-		respond_with(@ride)
+			if @bike.update(status: Bike.status[:reserved])
+				render json: @ride
+			else
+				render json: { error: @bike.errors.full_messages }
+			end
+		else
+			render json: { error: @ride.errors.full_messages }
+		end
 	end
 
 	def finish
 		if @ride.update(ride_params)
 			@bike = @ride.bike
-			@bike.model = @ride.stop_location # TODO: change this to location (only for test 0)
-
+			if @bike.update(location: @ride.stop_location)
+				render json: @ride
+			else
+				render json: { error: @bike.errors.full_messages }
+			end
+		else
+			render json: { error: @ride.errors.full_messages }
+		end
 	end
 
 	def update
-		@ride.update(ride_params)
-		respond_with(@ride)
+		if @ride.update(ride_params)
+			render json: @ride
+		else
+			render json: { error: @ride.errors.full_messages }
+		end
 	end
 
 	def destroy
 		@ride.destroy
-		respond_with(@ride)
 	end
 
 	private
 		def set_ride
 			@ride = Ride.find(params[:id])
-			redirect_to home_path if (current_user != @transaction.user || current_user.admin?)
+			redirect_to home_path if (current_user != @ride.user || current_user.admin?)
 		end
 
 		def ride_params

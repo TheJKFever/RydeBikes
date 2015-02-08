@@ -7,4 +7,6 @@ class HomeController < ApplicationController
 	def about
 	end
 
+	def signup
+	end
 end

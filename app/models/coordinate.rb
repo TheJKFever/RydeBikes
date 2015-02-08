@@ -7,6 +7,6 @@ class Coordinate < ActiveRecord::Base
 	after_validation :geocode          # auto-fetch coordinates
 	geocoded_by :full_address
 
-	reverse_geocoded_by :latitude, :longitude
-	after_validation :reverse_geocode  # auto-fetch address
+	# reverse_geocoded_by :latitude, :longitude
+	# after_validation :reverse_geocode, address: :full_address  # auto-fetch address
 end

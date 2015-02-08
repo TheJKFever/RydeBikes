@@ -4,10 +4,10 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   def after_sign_in_path_for(resource)
-  	# user signed in, but not necesarilly validated
   	if (current_user.valid_email)
+      # user signed in, but not necesarilly validated
   		redirect_to CONFIRM_EMAIL_PATH if !(current_user.confirmed?)
-  		redirect_to MAP_PATH
+  		redirect_to home_path
   	else
   		redirect_to INVALID_EMAIL_PATH if (!current_user.valid_email)
   		redirect_to CREATE_PASSWORD_PATH if (!current_user.valid_password)

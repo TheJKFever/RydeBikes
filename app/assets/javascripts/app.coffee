@@ -1,0 +1,2 @@
+ryde = angular.module('ryde',[
+])

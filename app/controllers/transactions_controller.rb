@@ -1,53 +1,62 @@
 class TransactionsController < ApplicationController
 	before_filter :authenticate_user!
-	before_filter :authenticate_admin!, :only => [:edit, :update, :destroy]
+	before_filter :authenticate_admin!, :except => [:index, :show, :new, :create]
 	before_action :set_transaction, only: [:show, :edit, :update, :destroy]
 
-	respond_to :html, :json
+	respond_to :json
 
+  # AVAILABLE TO USERS
 	def index # returns all transactions methods for a particular user
-		@transactions = Transaction.find_by_user_id(current_user.id)
-		respond_with(@transactions)
+		@transactions = current_user.admin? Transaction.all : Transaction.find_by_user_id(current_user.id)
+		render json: @transactions
 	end
 
 	def show
-		respond_with(@transaction)
+		render json: @transaction
 	end
 
 	def new
 		@transaction = Transaction.new
-		respond_with(@transaction)
+		render json: @transaction
 	end
+
+	def create # TODO: Add Stripe api
+		@transaction = Transaction.new(transaction_params)
+		if @transaction.save
+			render json: @transaction
+		else
+			render json: { error: @transaction.errors.full_messages }
+		end
+	end
+
+  # AVAILABLE ONLY TO ADMIN 
 
 	def edit
-	end
-
-	def create
-		@transaction = Transaction.new(transaction_params)
-		@transaction.save
-		respond_with(@transaction)
+		render json: @transaction
 	end
 
 	def update
-		@transaction.update(transaction_params)
-		respond_with(@transaction)
+		if @transaction.update(transaction_params)
+			render json: @transaction
+		else
+			render json: { error: @transaction.errors.full_messages }
+		end
 	end
 
 	def destroy
 		@transaction.destroy
-		respond_with(@transaction)
 	end
 
 	private
-		def set_transaction
-			@transaction = Transaction.find(params[:id])
-			redirect_to home_path if (current_user != @transaction.user || current_user.admin?)
-		end
+	def set_transaction
+		@transaction = Transaction.find(params[:id])
+		redirect_to home_path if (current_user != @transaction.user || current_user.admin?)
+	end
 
-		def transaction_params
-			params.require(:transaction)
-			.permit(:status, :payment => [:user_id, :payment_type
-				#, :authentication_token
-				])
-		end
+	def transaction_params
+		params.require(:transaction)
+		.permit(:status, :payment => [:user_id, :payment_type
+			#, :authentication_token
+			], :ride, :amount)
+	end
 end
