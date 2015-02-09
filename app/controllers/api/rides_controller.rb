@@ -6,7 +6,7 @@ class RidesController < ApplicationController
 	respond_to :json
 
 	def index # returns all rides methods for a particular user
-		@rides = user.admin? Ride.all : Ride.find_by_user_id(user.id)
+		@rides = user.admin? ? Ride.all : Ride.find_by_user_id(user.id)
 		render json: @rides
 	end
 
