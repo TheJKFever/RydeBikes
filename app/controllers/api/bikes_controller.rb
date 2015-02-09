@@ -12,7 +12,7 @@ class Api::BikesController < ApplicationController
     # puts coordinates
     # @bikes = Coordinate.near(coordinates, radius).joins(:bikes)
     @bikes = Bike.all
-    render json: @bikes(:include => {:location})
+    render json: @bikes
   end
 
   def show
@@ -25,12 +25,35 @@ class Api::BikesController < ApplicationController
   end
 
   def reserve 
-    # TODO: pass in user
-    # 
+    render json: { error: "This bike is not available to reserve" } if (!@bike.status==Bike.status[:available])
     @bike.status = Bike.status[:reserved]
     @bike.save
-    @ride = Ride.create(bike_id: @bike.id, start_location: @bike.location, start_time: DateTime.now, status: Ride.status[:progress])
-    respond_with(@ride)
+    @ride = Ride.create(user_id: @user.id, bike_id: @bike.id, start_location: @bike.location, start_time: DateTime.now, status: Ride.status[:progress])
+    render json: @ride
+  end
+
+  def return
+    @ride = @bike.current_ride
+    render json: { error: 'This bike is currently available' } if (!@bike.status==Bike.status[:reserved])
+    render json: { error: 'You are not the current owner of this bike' } if (@user!=@ride.user)
+    # Change this to name and network
+    @location = Coordinate.find_or_initialize_by(name: params[:bike][:location][:name])
+    if @location.save
+      if @ride.update(stop_location: @location, stop_time: DateTime.now, status: Ride.status[:complete])
+        # if bike reserved, find most recent bike
+        @bike.status = Bike.status[:available]
+        @bike.current_ride = nil
+        if @bike.save
+          render json: @bike
+        else
+          render json: { error: @bike.errors.full_messages }
+        end
+      else
+        render json: { error: @ride.errors.full_messages }
+      end
+    else
+        render json: { error: @location.errors.full_messages }
+    end
   end
 
   private
@@ -41,7 +64,7 @@ class Api::BikesController < ApplicationController
 	def authenticate_apiKey
     puts params
     if (apiKey = ApiKey.find_by_access_token(params['apiKey']))
-      user = apiKey.user
+      @user = apiKey.user
     else
       render json: { errors: "Invalid apiKey" }
     end
@@ -49,6 +72,6 @@ class Api::BikesController < ApplicationController
 
   def bike_params
     params.require(:bike)
-    .permit(:status, :model, :network => [:name], :location => [:latitude, :longitude])
+    .permit(:status, :model, :network => [:name], :location => [:id, :name, :full_address, :latitude, :longitude])
   end
 end
