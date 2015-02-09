@@ -7,7 +7,10 @@ class TransactionsController < ApplicationController
 
   # AVAILABLE TO USERS
 	def index # returns all transactions methods for a particular user
-		@transactions = current_user.admin? Transaction.all : Transaction.find_by_user_id(current_user.id)
+		if current_user.admin?
+			@transactions = Transaction.all
+		else
+			@transactions = Transaction.find_by_user_id(current_user.id)
 		render json: @transactions
 	end
 
