@@ -11,6 +11,7 @@ class TransactionsController < ApplicationController
 			@transactions = Transaction.all
 		else
 			@transactions = Transaction.find_by_user_id(current_user.id)
+		end
 		render json: @transactions
 	end
 
@@ -32,7 +33,7 @@ class TransactionsController < ApplicationController
 		end
 	end
 
-  # AVAILABLE ONLY TO ADMIN 
+	# AVAILABLE ONLY TO ADMIN 
 
 	def edit
 		render json: @transaction
