@@ -58,8 +58,7 @@ class TransactionsController < ApplicationController
 
 	def transaction_params
 		params.require(:transaction)
-		.permit(:status, :payment => [:user_id, :payment_type
+		.permit(:status, :ride, :amount, :payment => [:user_id, :payment_type])
 			#, :authentication_token
-			], :ride, :amount)
 	end
 end
