@@ -1,5 +1,4 @@
 class Api::RidesController < ApplicationController
-class RidesController < ApplicationController
 	before_filter :authenticate_apiKey
 	before_action :set_ride, except: [:index]
 
