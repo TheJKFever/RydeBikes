@@ -10,7 +10,7 @@ class Coordinate < ActiveRecord::Base
 	# reverse_geocoded_by :latitude, :longitude
 	# after_validation :reverse_geocode, address: :full_address  # auto-fetch address
 
-	def to_json(options={})
+	def as_json(options={})
 		super(:only => [:name, :full_address])
 	end
 end

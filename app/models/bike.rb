@@ -12,7 +12,7 @@ class Bike < ActiveRecord::Base
 		@@status
 	end
 
-	def to_json(options={})
+	def as_json(options={})
 		super(:only => [:status, :model], :include => {:location => {:only => [:name, :full_address]}})
 	end
 end
