@@ -13,6 +13,6 @@ class Bike < ActiveRecord::Base
 	end
 
 	def as_json(options={})
-		super(:only => [:status, :model], :include => {:location => {:only => [:name, :full_address]}})
+		super(:only => [:id, :status, :model], :include => {:location => {:only => [:name, :full_address]}})
 	end
 end
