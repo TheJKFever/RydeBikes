@@ -45,6 +45,7 @@ class Api::BikesController < ApplicationController
       if @ride.update(stop_location: @location, stop_time: DateTime.now, status: Ride.status[:complete])
         # if bike reserved, find most recent bike
         @bike.status = Bike.status[:available]
+        @bike.location = @location
         @bike.current_ride = nil
         if @bike.save
           render json: @bike
