@@ -29,8 +29,9 @@ class Api::BikesController < ApplicationController
   def reserve 
     render json: { error: "This bike is not available to reserve" } if (!@bike.status==Bike.status[:available])
     @bike.status = Bike.status[:reserved]
-    @bike.save
     @ride = Ride.create(user_id: @user.id, bike_id: @bike.id, start_location: @bike.location, start_time: DateTime.now, status: Ride.status[:progress])
+    @bike.current_ride = @ride
+    @bike.save
     render json: @ride
   end
 
