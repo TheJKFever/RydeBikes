@@ -1,6 +1,8 @@
 class Api::BikesController < ApplicationController
+  skip_before_filter :verify_authenticity_token
 	before_filter :authenticate_apiKey
   before_action :set_bike, except: [:index]
+  before_filter :set_headers
 
   respond_to :json
 
@@ -70,8 +72,17 @@ class Api::BikesController < ApplicationController
     end
 	end
 
+  def set_headers
+    headers['Access-Control-Allow-Origin'] = '*'
+    headers['Access-Control-Expose-Headers'] = 'ETag'
+    headers['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD'
+    headers['Access-Control-Allow-Headers'] = '*,x-requested-with,Content-Type,If-Modified-Since,If-None-Match'
+    headers['Access-Control-Max-Age'] = '86400'
+  end  
+
   def bike_params
     params.require(:bike)
     .permit(:status, :model, :network => [:name], :location => [:id, :name, :full_address, :latitude, :longitude])
   end
+
 end
