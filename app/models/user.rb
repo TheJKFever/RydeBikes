@@ -18,6 +18,7 @@ class User < ActiveRecord::Base
 	has_many :authentications
 	belongs_to :network
 	has_one :api_key
+	has_many :intersts
 
 	def find_or_initialize_by_omniauth(auth)
 		user = find_or_initialize_by_email(auth['info']['email'])

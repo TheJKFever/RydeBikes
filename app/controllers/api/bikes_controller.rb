@@ -1,7 +1,7 @@
 class Api::BikesController < ApplicationController
   skip_before_filter :verify_authenticity_token
 	before_filter :authenticate_apiKey
-  before_action :set_bike, except: [:index]
+  before_action :set_bike, except: [:index, :interest]
   before_filter :set_headers
 
   respond_to :json
@@ -32,7 +32,7 @@ class Api::BikesController < ApplicationController
     @ride = Ride.create(user_id: @user.id, bike_id: @bike.id, start_location: @bike.location, start_time: DateTime.now, status: Ride.status[:progress])
     @bike.current_ride = @ride
     @bike.save
-    render json: @ride
+    render json: @bike
   end
 
   def return
@@ -57,6 +57,20 @@ class Api::BikesController < ApplicationController
       end
     else
         render json: { error: @location.errors.full_messages }
+    end
+  end
+
+  def interest
+    @location = Coordinate.find_or_initialize_by(name: params[:bike][:location][:name])
+    if @location.save
+      @interest = Interest.new(user_id: @user, location: @location)
+      if @interest.save
+        render json: { success: true }
+      else
+        render json: { error: @interest.errors.full_messages }
+      end
+    else
+      render json: { error: @location.errors.full_messages }
     end
   end
 

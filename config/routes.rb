@@ -12,11 +12,12 @@ Rails.application.routes.draw do
   resources :bikes, defaults: {format: 'json'}
   get '/bikes/reserve/:id' => 'bikes#reserve', defaults: {format: 'json'}
 
-  namespace :api do
-    resources :bikes, defaults: {format: 'json'}
-    resources :rides, defaults: {format: 'json'}
-    post '/bikes/reserve/:id' => 'bikes#reserve', defaults: {format: 'json'}
-    post '/bikes/return/:id' => 'bikes#return', defaults: {format: 'json'}
+  namespace :api, defaults: { format: 'json' } do
+    resources :bikes
+    resources :rides
+    post '/bikes/reserve/:id' => 'bikes#reserve'
+    post '/bikes/return/:id' => 'bikes#return'
+    post '/bikes/interest' => 'bikes#interest'
   end
 
   # The priority is based upon order of creation: first created -> highest priority.
