@@ -1,8 +1,8 @@
 class Api::BikesController < ApplicationController
   skip_before_filter :verify_authenticity_token
 	before_filter :authenticate_apiKey
-  before_action :set_bike, except: [:index, :interest]
   before_filter :set_headers
+  before_action :set_bike, except: [:index, :interest]
 
   respond_to :json
 
@@ -61,6 +61,7 @@ class Api::BikesController < ApplicationController
   end
 
   def interest
+    puts "GOT TO THE ACTION INTEREST"
     @location = Coordinate.find_or_initialize_by(name: params[:location])
     if @location.save
       @interest = Interest.new(user_id: @user, location: @location)
