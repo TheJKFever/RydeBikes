@@ -61,7 +61,7 @@ class Api::BikesController < ApplicationController
   end
 
   def interest
-    @location = Coordinate.find_or_initialize_by(name: params[:bike][:location][:name])
+    @location = Coordinate.find_or_initialize_by(name: params[:location])
     if @location.save
       @interest = Interest.new(user_id: @user, location: @location)
       if @interest.save
