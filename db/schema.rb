@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150220075211) do
+ActiveRecord::Schema.define(version: 20150220191157) do
 
   create_table "addresses", force: :cascade do |t|
     t.string   "street"
@@ -87,13 +87,13 @@ ActiveRecord::Schema.define(version: 20150220075211) do
   create_table "rides", force: :cascade do |t|
     t.integer  "bike_id"
     t.integer  "user_id"
-    t.integer  "start_location"
-    t.integer  "stop_location"
+    t.integer  "start_location_id"
+    t.integer  "stop_location_id"
     t.integer  "start_time"
     t.integer  "stop_time"
     t.string   "status"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
   end
 
   add_index "rides", ["user_id", "status"], name: "index_rides_on_user_id_and_status"

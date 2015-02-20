@@ -1,6 +1,8 @@
 class ApiKey < ActiveRecord::Base
 	before_create :generate_access_token
 
+	validates :user_id, presence: true
+	
 	belongs_to :user
 
 private
