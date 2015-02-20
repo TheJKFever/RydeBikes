@@ -6,7 +6,7 @@ class Api::RidesController < ApplicationController
 	respond_to :json
 
 	def index # returns all rides methods for a particular user
-		@rides = user.admin? ? Ride.all : Ride.find_by_user_id(user.id)
+		@rides = @user.admin? ? Ride.all : Ride.find_by_user_id(@user.id)
 		render json: @rides
 	end
 
@@ -56,11 +56,11 @@ class Api::RidesController < ApplicationController
 
 	def authenticate_apiKey
 		puts params
-    if (apiKey = ApiKey.find_by_access_token(params['apiKey']))
-      user = apiKey.user
-    else
-      render json: { errors: "Invalid apiKey" }
-    end
+	    if (apiKey = ApiKey.find_by_access_token(params['apiKey']))
+	      @user = apiKey.user
+	    else
+	      render json: { errors: "Invalid apiKey" }
+	    end
 	end
 
 	def ride_params

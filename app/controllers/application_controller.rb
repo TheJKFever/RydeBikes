@@ -19,4 +19,8 @@ class ApplicationController < ActionController::Base
   def after_sign_out_path_for(resource_or_scope)
     root_path # login page
   end
+
+  def authenticate_admin!
+    return render json: { error: 'Must have administrative priviledges' } if (!current_user || !current_user.admin?)
+  end
 end

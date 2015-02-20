@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  devise_for :admins
   devise_for :users #, :only => :omniauth_callbacks
 
   root to: 'home#index'
