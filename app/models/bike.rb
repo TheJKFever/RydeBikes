@@ -9,7 +9,7 @@ class Bike < ActiveRecord::Base
 
 	has_many :rides
 
-	validates :network_id, presence: true
+	# validates :network_id, presence: true
 	validates_associated :location
 
 	belongs_to :network
