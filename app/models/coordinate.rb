@@ -1,7 +1,7 @@
 class Coordinate < ActiveRecord::Base
 	# Change these to has_many's and somehow limit the locations...
 
-	validates :name, presence: true
+	# validates :name, presence: true
 
 	has_one :ride, foreign_key: "start_location"
 	has_one :ride, foreign_key: "stop_location"
