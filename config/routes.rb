@@ -1,22 +1,32 @@
 Rails.application.routes.draw do
   devise_for :users #, :only => :omniauth_callbacks
 
+  # root to: 'angular#index'
   root to: 'home#index'
-  get 'bikes' => 'bikes#index', defaults: {format: 'json'}, as: :home
   
+  get 'bikes' => 'bikes#index', defaults: {format: 'json'}, as: :home
+  resources :bikes, defaults: {format: 'json'} 
+  # post '/bikes/reserve/:id' => 'bikes#reserve'
+  # post '/bikes/return/:id' => 'bikes#return'
+
   # OAuth
   get '/users/auth/:provider/callback' => 'authentication#create', via: [:get, :post]
   get '/auth/:provider/signout' => 'authentication#destroy', via: [:get, :post]
 
-  resources :bikes, defaults: {format: 'json'}
-  get '/bikes/reserve/:id' => 'bikes#reserve', defaults: {format: 'json'}
-
   namespace :api, defaults: { format: 'json' } do
-    post '/bikes/reserve/:id' => 'bikes#reserve'
-    post '/bikes/return/:id' => 'bikes#return'
-    post '/bikes/interest' => 'bikes#interest'
-    resources :bikes
-    resources :rides
+    get  '/bikes'             => 'bikes#index' 
+    post '/bikes/reserve' => 'bikes#reserve'
+    post '/bikes/return'  => 'bikes#return'
+    # post '/bikes/interest' => 'bikes#interest'
+    # resources :bikes
+    # resources :rides
+    devise_scope :user do
+      get  'sign_in',     to: 'devise/sessions#new', as: 'new_user_session'
+      post 'sign_in',     to: 'devise/sessions#create', as: 'user_session'
+      delete 'sign_out',  to: 'devise/sessions#destroy', as: 'destroy_user_session'
+      get 'sign_up',      to: 'devise/registrations#new', as: 'new_user_registration'
+      post 'sign_up',     to: 'devise/registrations#create', as: 'user_registration'
+    end
   end
 
   # The priority is based upon order of creation: first created -> highest priority.

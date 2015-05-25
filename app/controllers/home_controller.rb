@@ -10,6 +10,6 @@ class HomeController < ApplicationController
 	def signup
 	end
 
-	def index		
+	def index
 	end
 end

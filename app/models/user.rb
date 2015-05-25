@@ -1,8 +1,27 @@
 class User < ActiveRecord::Base
+	@@service_type = {
+		:membership => 'membership',
+		:payperuse 	=> 'pay_per_use',
+		:compt 		=> 'compt'
+	}
+
+	def self.service_type
+		@@service_type
+	end
+
+	before_create do |user|
+		user.api_key = ApiKey.create(user_id: user.id)
+	end
+
+  	# Include default devise modules. Others available are:
+  	# :confirmable, :lockable, :timeoutable and :omniauthable
+  	devise :database_authenticatable, :registerable,
+  		:recoverable, :rememberable, :trackable, :validatable
 
 	validates :email, :presence => true
-	validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i, :message => "email must end in .edu"
-	validate :validate_network
+	validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i, 
+		:message => "email must end in .edu", :unless => :admin
+	validate :validate_network, :unless => :admin
 
 	# Include default devise modules. Others available are:
 	# :confirmable, :lockable, :timeoutable and :omniauthable
@@ -19,6 +38,10 @@ class User < ActiveRecord::Base
 	belongs_to :network
 	has_one :api_key
 	has_many :intersts
+
+	def serializable_hash(options={})
+		super({ only: [:name, :phone, :service_type, :email, :picture] }.merge(options || {}))
+	end
 
 	def find_or_initialize_by_omniauth(auth)
 		user = find_or_initialize_by_email(auth['info']['email'])
@@ -58,6 +81,7 @@ class User < ActiveRecord::Base
 	end
 
 	def valid_email?(email)
+		return true if :admin
 		return !(email.to_s =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i).nil?
 	end
 
@@ -67,6 +91,3 @@ class User < ActiveRecord::Base
 		errors[:base] << "Invalid Network" if self.network.nil?
 	end
 end
-
-
-

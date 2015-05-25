@@ -3,16 +3,16 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
-  respond_to :json
+  respond_to :json, :html
 
   def after_sign_in_path_for(resource)
   	if (current_user.valid_email)
       # user signed in, but not necesarilly validated
-  		redirect_to CONFIRM_EMAIL_PATH if !(current_user.confirmed?)
-  		redirect_to home_path
+  		return CONFIRM_EMAIL_PATH if !(current_user.confirmed?)
+  		return home_path
   	else
-  		redirect_to INVALID_EMAIL_PATH if (!current_user.valid_email)
-  		redirect_to CREATE_PASSWORD_PATH if (!current_user.valid_password)
+  		return INVALID_EMAIL_PATH if (!current_user.valid_email)
+  		return CREATE_PASSWORD_PATH if (!current_user.valid_password)
   		# not sure what other errors there would be, so just sign out
   		sign_out(current_user)
   	end

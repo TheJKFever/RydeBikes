@@ -62,6 +62,8 @@ class AuthenticationController < ApplicationController
     puts params
     if params[:provider] == "facebook"
       signout_fb
+    else
+      sign_out
     end
   end
 

@@ -1,6 +1,4 @@
-class Api::RidesController < ApplicationController
-	skip_before_filter :verify_authenticity_token
-	before_filter :authenticate_apiKey
+class Api::RidesController < Api::ApiController
 	before_action :set_ride, except: [:index]
 
 	respond_to :json
@@ -53,15 +51,6 @@ class Api::RidesController < ApplicationController
 	def set_ride
 		@ride = Ride.find(params[:id])
 	end		
-
-	def authenticate_apiKey
-		puts params
-	    if (apiKey = ApiKey.find_by_access_token(params['apiKey']))
-	      @user = apiKey.user
-	    else
-	      render json: { errors: "Invalid apiKey" }
-	    end
-	end
 
 	def ride_params
 		params.require(:ride)

@@ -3,8 +3,6 @@ class BikesController < ApplicationController
 	before_filter :authenticate_admin!, except: [:index, :show, :reserve]
   before_action :set_bike, except: [:index, :create, :new]
 
-  respond_to :json
-
   # AVAILABLE TO USERS
 
   def index # returns all bikes within a certain radius

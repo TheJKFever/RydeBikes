@@ -20,12 +20,23 @@ class Ride < ActiveRecord::Base
 		return (self.status == @@status[:complete])
 	end
 
-	def as_json(options={})
-		super(:only => [:id, :bike_id, :start_time, :stop_time, :status, :transaction_id], 
+	def summary
+		# TODO: return json of summary of ride, miles, etc.
+		@summary = {
+			:duration => (self.stop_time - self.start_time),
+			:miles 	  => 1 # distance(self.start_location - self.stop_location)
+		}
+		return @summary.merge(self.to_json)
+	end
+
+	def serializable_hash(options={})
+		super({
+			:only => [:id, :bike_id, :start_time, :stop_time, :status, :transaction_id], 
 			:include => {
 				:user => {:only => [:name, :email]}, 
 				:start_location => {:only => [:name]}, 
 				:stop_location => {:only => [:name]}
-			})
+			}
+		}.merge(options || {}))
 	end
 end

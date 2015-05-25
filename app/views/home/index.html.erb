@@ -4,7 +4,7 @@
 		<%= link_to "Sign in", new_user_session_path, class: "signin-devise" %>
 		<a class="signin-fb" href="#">Sign in with facebook</a>
 	<% else %>
-		<a class="signout" href="#">Sign out</a>
+    <%= link_to "Sign out", destroy_user_session_path, method: :delete, class: "signout" %>
 	<% end %>
 </p>
 
