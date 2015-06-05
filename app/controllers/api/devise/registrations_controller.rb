@@ -17,6 +17,7 @@ class Api::Devise::RegistrationsController < Devise::RegistrationsController
   def create
     build_resource(sign_up_params)
 
+    puts resource
     resource.save
     yield resource if block_given?
     if resource.persisted?
@@ -35,7 +36,7 @@ class Api::Devise::RegistrationsController < Devise::RegistrationsController
       respond_with resource
     end
 
-    render json: @user.as_json({:include => :api_key})
+    # render json: @user.as_json({:include => :api_key})
   end
 
   # GET /resource/edit
@@ -83,4 +84,11 @@ class Api::Devise::RegistrationsController < Devise::RegistrationsController
   # def after_inactive_sign_up_path_for(resource)
   #   super(resource)
   # end
+
+  # Sets minimum password length to show to user
+  def set_minimum_password_length
+    if devise_mapping.validatable?
+      @minimum_password_length = resource_class.password_length.min
+    end
+  end
 end
