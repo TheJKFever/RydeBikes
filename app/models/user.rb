@@ -21,7 +21,7 @@ class User < ActiveRecord::Base
 	validates :email, :presence => true
 	validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i, 
 		:message => "email must end in .edu", :unless => :admin
-	validate :validate_network, :unless => :admin
+	# validate :validate_network, :unless => :admin
 
 	# Include default devise modules. Others available are:
 	# :confirmable, :lockable, :timeoutable and :omniauthable
