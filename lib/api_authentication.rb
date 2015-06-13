@@ -1,5 +1,6 @@
 module ApiAuthentication
   	def self.included(base)
+  		# TODO: add this before filter and remove from controllers
     	# base.before_filter :authenticate_apiKey
   	end
 

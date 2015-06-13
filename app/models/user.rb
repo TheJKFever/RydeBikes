@@ -13,14 +13,10 @@ class User < ActiveRecord::Base
 		user.api_key = ApiKey.create(user_id: user.id)
 	end
 
-  	# Include default devise modules. Others available are:
-  	# :confirmable, :lockable, :timeoutable and :omniauthable
-  	devise :database_authenticatable, :registerable,
-  		:recoverable, :rememberable, :trackable, :validatable
-
 	validates :email, :presence => true
-	validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i, 
-		:message => "email must end in .edu", :unless => :admin
+
+	# validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i, 
+		# :message => "email must end in .edu", :unless => :admin
 	# validate :validate_network, :unless => :admin
 
 	# Include default devise modules. Others available are:

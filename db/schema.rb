@@ -72,14 +72,11 @@ ActiveRecord::Schema.define(version: 20150422075241) do
   create_table "payments", force: :cascade do |t|
     t.string   "authentication_token"
     t.integer  "user_id"
+    t.boolean  "default",              default: true
+    t.string   "status"
     t.string   "payment_type"
-    t.datetime "created_at",           null: false
-    t.datetime "updated_at",           null: false
-  end
-
-  create_table "payments_users", id: false, force: :cascade do |t|
-    t.integer "payment_id", null: false
-    t.integer "user_id",    null: false
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
   end
 
   create_table "rides", force: :cascade do |t|

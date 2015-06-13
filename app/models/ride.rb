@@ -3,6 +3,7 @@ class Ride < ActiveRecord::Base
 		:progress => "in progress",
 		:complete => "complete"
 	}
+
 	def self.status
 		@@status
 	end

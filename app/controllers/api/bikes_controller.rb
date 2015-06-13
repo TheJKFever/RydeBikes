@@ -1,5 +1,5 @@
 class Api::BikesController < Api::ApiController
-  before_action :set_bike, except: [:index, :interest]
+  before_action :set_bike, only: [:reserve, :return]
 
   respond_to :json
 
@@ -31,6 +31,7 @@ class Api::BikesController < Api::ApiController
   #   id: bike_id
   def reserve # Start Ride
     render json: { error: "This bike is not available to reserve" } if (@bike.status != Bike.status[:available])
+    if @user.service_type
     @bike.status = Bike.status[:reserved]
     @ride = Ride.create(
       user_id: @user.id, 
@@ -61,6 +62,7 @@ class Api::BikesController < Api::ApiController
     # TODO: get name for this location by nearest Coordinate with name...
     @location = Coordinate.find_or_initialize_by(latitude: params[:latitude], longitude: params[:longitude])
     render json: { error: @location.errors.full_messages } if !@location.valid?
+    @location.save
     
     @bike.status = Bike.status[:available]
     @bike.location = @location
@@ -72,7 +74,6 @@ class Api::BikesController < Api::ApiController
     @ride.status = Ride.status[:complete]
     render json: { error: @ride.errors.full_messages } if !@ride.valid?
 
-    @location.save
     @bike.save
     # TODO: make this @ride.summary
     render json: @ride.to_json if @ride.save

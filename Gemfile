@@ -33,7 +33,10 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # gem 'capistrano-rails', group: :development
 
 # Use devise for user authentication
-gem 'devise'
+gem 'devise' 
+
+# briantree
+gem "braintree"
 
 # Authentication
 gem 'omniauth'

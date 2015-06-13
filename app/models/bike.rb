@@ -17,6 +17,6 @@ class Bike < ActiveRecord::Base
 	belongs_to :current_ride, class_name: 'Ride', foreign_key: 'ride_id'
 
 	def as_json(options={})
-		super(:only => [:id, :status, :model], :include => {:location => {:only => [:name, :full_address]}})
+		super(:only => [:id, :status, :model], :include => {:location => {:only => [:name, :full_address, :latitude, :longitude]}})
 	end
 end
