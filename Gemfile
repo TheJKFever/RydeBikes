@@ -51,6 +51,8 @@ gem 'geocoder'
 # adding bower for angular
 gem 'bower-rails'
 
+  gem 'populator' # to seed dev database
+  gem 'faker'     # to fake data in seed
 
 group :development, :test do
   gem 'sqlite3'
