@@ -3,8 +3,8 @@ class CreateRides < ActiveRecord::Migration
 	create_table :rides do |t|
 		t.integer :bike_id
 		t.integer :user_id
-		t.integer :start_location
-		t.integer :stop_location
+		t.integer :start_location_id
+		t.integer :stop_location_id
 		t.datetime :start_time
 		t.datetime :stop_time
 		t.string :status

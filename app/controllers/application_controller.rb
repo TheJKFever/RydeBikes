@@ -23,6 +23,12 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_admin!
-    return render json: { error: 'Must have administrative priviledges' } if (!current_user || !current_user.admin?)
+    if !current_user || !current_user.admin?
+      respond_to do |format|
+        format.html redirect_to root_path, flash[:alert] = 'Must have administrative priviledges'
+        format.json { render { error: 'Must have administrative priviledges' }
+      end
+    end
+    # return render json: { error: 'Must have administrative priviledges' } if (!current_user || !current_user.admin?)
   end
 end

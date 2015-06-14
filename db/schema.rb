@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150422075241) do
+ActiveRecord::Schema.define(version: 20150211215205) do
 
   create_table "addresses", force: :cascade do |t|
     t.string   "street"
@@ -41,20 +41,20 @@ ActiveRecord::Schema.define(version: 20150422075241) do
 
   create_table "bikes", force: :cascade do |t|
     t.string   "status"
+    t.integer  "network_id"
     t.integer  "location_id"
     t.string   "model"
+    t.integer  "ride_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
-    t.integer  "network_id"
-    t.integer  "ride_id"
   end
 
   create_table "coordinates", force: :cascade do |t|
     t.float   "latitude"
     t.float   "longitude"
+    t.integer "network_id"
     t.string  "name"
     t.string  "full_address"
-    t.integer "network_id"
   end
 
   create_table "interests", force: :cascade do |t|
@@ -70,13 +70,12 @@ ActiveRecord::Schema.define(version: 20150422075241) do
   end
 
   create_table "payments", force: :cascade do |t|
-    t.string   "authentication_token"
+    t.string   "token"
     t.integer  "user_id"
-    t.boolean  "default",              default: true
     t.string   "status"
     t.string   "payment_type"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
   end
 
   create_table "rides", force: :cascade do |t|
@@ -89,16 +88,20 @@ ActiveRecord::Schema.define(version: 20150422075241) do
     t.string   "status"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
-    t.integer  "transaction_id"
   end
 
   add_index "rides", ["user_id", "status"], name: "index_rides_on_user_id_and_status"
 
   create_table "transactions", force: :cascade do |t|
     t.integer  "payment_id"
+    t.string   "payment_type"
+    t.integer  "user_id"
+    t.integer  "ride_id"
+    t.float    "amount"
     t.string   "status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string   "details"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
   end
 
   create_table "users", force: :cascade do |t|
@@ -106,8 +109,13 @@ ActiveRecord::Schema.define(version: 20150422075241) do
     t.string   "phone"
     t.integer  "address_id"
     t.string   "service_type"
+    t.string   "status"
     t.string   "email",                  default: "",    null: false
     t.string   "encrypted_password",     default: "",    null: false
+    t.boolean  "admin",                  default: false
+    t.integer  "network_id"
+    t.string   "picture"
+    t.string   "braintree_token"
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
@@ -116,15 +124,12 @@ ActiveRecord::Schema.define(version: 20150422075241) do
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "network_id"
-    t.string   "picture"
     t.string   "confirmation_token"
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
-    t.boolean  "admin",                  default: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true

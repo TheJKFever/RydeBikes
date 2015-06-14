@@ -16,22 +16,15 @@ class Api::BikesController < Api::ApiController
     render json: @bikes
   end
 
-  # Don't need this in API as all bikes info is given in index
-  # def show
-  #   render json: @bike
-  # end
-
-  # def update
-  #   @bike.update(bike_params)
-  #   respond_with(@bike)
-  # end
-
+  # Dont let a user reserve a bike unless they have
+  # a payment method added and are in good standing
+  #
   # Expected params:
   #   X-Api-Key: api_key
   #   id: bike_id
   def reserve # Start Ride
+    validates_has_payment_and_good_standing
     render json: { error: "This bike is not available to reserve" } if (@bike.status != Bike.status[:available])
-    if @user.service_type
     @bike.status = Bike.status[:reserved]
     @ride = Ride.create(
       user_id: @user.id, 
@@ -52,27 +45,39 @@ class Api::BikesController < Api::ApiController
   #   id: bike_id
   #   latitude: lat
   #   longitude: long
+  #   payment_method_nonce: braintree token
   def return # End Ride
     @ride = @bike.current_ride
-    render json: { error: 'Could not find ride in progress associated with this bike' } if @ride.nil?
+    render json: { error: 'Could not find ride in progress associated with this bike' }, status: 404 if @ride.nil?
     # This should never happen...
-    render json: { error: 'Cannot return a bike that is not reserved' } if (@bike.status != Bike.status[:reserved])
-    render json: { error: 'You are not the current owner of this bike' } if (@user != @ride.user)
+    render json: { error: 'Cannot return a bike that is not reserved' }, status: 401 if (@bike.status != Bike.status[:reserved])
+    render json: { error: 'You are not the current owner of this bike' }, status: 401 if (@user != @ride.user)
 
     # TODO: get name for this location by nearest Coordinate with name...
     @location = Coordinate.find_or_initialize_by(latitude: params[:latitude], longitude: params[:longitude])
     render json: { error: @location.errors.full_messages } if !@location.valid?
     @location.save
     
-    @bike.status = Bike.status[:available]
-    @bike.location = @location
-    @bike.current_ride = nil
-    render json: { error: @bike.errors.full_messages } if !@bike.valid?
-    
+    # end Ride
     @ride.stop_location = @location, 
     @ride.stop_time = DateTime.now, 
     @ride.status = Ride.status[:complete]
     render json: { error: @ride.errors.full_messages } if !@ride.valid?
+
+    # Charge for ride
+    if @user.service_type === User.service_type[:payperuse]
+      if Transaction.charge_user_for_ride(@user, @ride)
+        # TODO: Finish this
+      else
+        # TODO: What happens if transaction failse
+        # @user.status === User.status[:badperson]
+      end
+    end
+
+    @bike.status = Bike.status[:available]
+    @bike.location = @location
+    @bike.current_ride = nil
+    render json: { error: @bike.errors.full_messages } if !@bike.valid?    
 
     @bike.save
     # TODO: make this @ride.summary
