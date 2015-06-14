@@ -1,4 +1,4 @@
-class TransactionsController < Api::ApiController
+class Api::TransactionsController < Api::ApiController
 	before_action :set_transaction, only: [:show, :edit, :update, :destroy]
 
 	respond_to :json
