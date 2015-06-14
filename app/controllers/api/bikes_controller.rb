@@ -31,7 +31,6 @@ class Api::BikesController < Api::ApiController
   #   id: bike_id
   def reserve # Start Ride
     render json: { error: "This bike is not available to reserve" } if (@bike.status != Bike.status[:available])
-    if @user.service_type
     @bike.status = Bike.status[:reserved]
     @ride = Ride.create(
       user_id: @user.id, 
