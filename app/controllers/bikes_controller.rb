@@ -21,14 +21,14 @@ class BikesController < ApplicationController
   end
 
   def reserve 
-    @bike.status = Bike.status[:reserved]
+    @bike.status = Bike::STATUS[:reserved]
     if @bike.save
       if @ride = Ride.create(
           user: current_user,
           bike_id: @bike.id,
           start_location: @bike.location, 
           start_time: DateTime.now, 
-          status: Ride.status[:progress])
+          status: Ride::STATUS[:progress])
         render json: @ride
       else
         render json: { error: @ride.errors.full_messages }

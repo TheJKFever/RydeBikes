@@ -4,8 +4,8 @@ class Coordinate < ActiveRecord::Base
 	# validates :name, presence: true
 
 	belongs_to :network
-	has_one :ride, foreign_key: "start_location"
-	has_one :ride, foreign_key: "stop_location"
+	has_one :ride, foreign_key: "start_location_id"
+	has_one :ride, foreign_key: "stop_location_id"
 	has_one :bike, foreign_key: "location_id"
 	has_one :interest
 

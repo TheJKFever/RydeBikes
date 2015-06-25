@@ -11,51 +11,50 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150422075241) do
+ActiveRecord::Schema.define(version: 20150211215205) do
 
   create_table "addresses", force: :cascade do |t|
-    t.string   "street"
-    t.string   "apt"
-    t.string   "city"
-    t.string   "zipcode"
-    t.string   "state"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "api_keys", force: :cascade do |t|
-    t.string   "access_token"
-    t.integer  "user_id"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.string "street"
+    t.string "apt"
+    t.string "city"
+    t.string "zipcode"
+    t.string "state"
   end
 
   create_table "authentications", force: :cascade do |t|
-    t.integer  "user_id"
-    t.string   "provider"
-    t.string   "uid"
-    t.string   "token"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.string  "provider"
+    t.string  "uid"
+    t.string  "token"
   end
+
+  add_index "authentications", ["provider", "uid"], name: "index_authentications_on_provider_and_uid"
+  add_index "authentications", ["user_id"], name: "index_authentications_on_user_id"
 
   create_table "bikes", force: :cascade do |t|
     t.string   "status"
+    t.integer  "ride_id"
     t.integer  "location_id"
     t.string   "model"
+    t.integer  "network_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
-    t.integer  "network_id"
-    t.integer  "ride_id"
   end
 
+  add_index "bikes", ["location_id"], name: "index_bikes_on_location_id"
+  add_index "bikes", ["network_id"], name: "index_bikes_on_network_id"
+  add_index "bikes", ["ride_id"], name: "index_bikes_on_ride_id"
+
   create_table "coordinates", force: :cascade do |t|
+    t.integer "network_id"
     t.float   "latitude"
     t.float   "longitude"
     t.string  "name"
     t.string  "full_address"
-    t.integer "network_id"
   end
+
+  add_index "coordinates", ["latitude", "longitude"], name: "index_coordinates_on_latitude_and_longitude"
+  add_index "coordinates", ["network_id"], name: "index_coordinates_on_network_id"
 
   create_table "interests", force: :cascade do |t|
     t.integer  "user_id"
@@ -69,15 +68,20 @@ ActiveRecord::Schema.define(version: 20150422075241) do
     t.string "domain"
   end
 
+  add_index "networks", ["domain"], name: "index_networks_on_domain"
+
   create_table "payments", force: :cascade do |t|
-    t.string   "authentication_token"
+    t.string   "auth_token"
     t.integer  "user_id"
-    t.boolean  "default",              default: true
+    t.boolean  "default",      default: true
     t.string   "status"
     t.string   "payment_type"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
   end
+
+  add_index "payments", ["auth_token"], name: "index_payments_on_auth_token"
+  add_index "payments", ["user_id"], name: "index_payments_on_user_id"
 
   create_table "rides", force: :cascade do |t|
     t.integer  "bike_id"
@@ -87,12 +91,16 @@ ActiveRecord::Schema.define(version: 20150422075241) do
     t.datetime "start_time"
     t.datetime "stop_time"
     t.string   "status"
+    t.integer  "transaction_id"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
-    t.integer  "transaction_id"
   end
 
+  add_index "rides", ["bike_id"], name: "index_rides_on_bike_id"
+  add_index "rides", ["stop_time"], name: "index_rides_on_stop_time"
+  add_index "rides", ["transaction_id"], name: "index_rides_on_transaction_id"
   add_index "rides", ["user_id", "status"], name: "index_rides_on_user_id_and_status"
+  add_index "rides", ["user_id"], name: "index_rides_on_user_id"
 
   create_table "transactions", force: :cascade do |t|
     t.integer  "payment_id"
@@ -101,13 +109,18 @@ ActiveRecord::Schema.define(version: 20150422075241) do
     t.datetime "updated_at", null: false
   end
 
+  add_index "transactions", ["payment_id"], name: "index_transactions_on_payment_id"
+
   create_table "users", force: :cascade do |t|
+    t.boolean  "admin",                  default: false
+    t.integer  "network_id"
+    t.string   "picture"
     t.string   "name"
     t.string   "phone"
     t.integer  "address_id"
-    t.string   "service_type"
     t.string   "email",                  default: "",    null: false
     t.string   "encrypted_password",     default: "",    null: false
+    t.string   "access_token"
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
@@ -116,19 +129,18 @@ ActiveRecord::Schema.define(version: 20150422075241) do
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "network_id"
-    t.string   "picture"
     t.string   "confirmation_token"
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
-    t.boolean  "admin",                  default: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
+  add_index "users", ["access_token"], name: "index_users_on_access_token", unique: true
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
   add_index "users", ["email"], name: "index_users_on_email", unique: true
+  add_index "users", ["network_id"], name: "index_users_on_network_id"
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
 
 end

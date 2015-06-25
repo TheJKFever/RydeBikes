@@ -1,54 +1,47 @@
 class User < ActiveRecord::Base
-	@@service_type = {
-		:membership => 'membership',
-		:payperuse 	=> 'pay_per_use',
-		:compt 		=> 'compt'
-	}
+	validates_presence_of :email
 
-	def self.service_type
-		@@service_type
-	end
-
-	before_create do |user|
-		user.api_key = ApiKey.create(user_id: user.id)
-	end
-
-	validates :email, :presence => true
-
+	# Validates university email
 	# validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i, 
 		# :message => "email must end in .edu", :unless => :admin
 	# validate :validate_network, :unless => :admin
 
-	# Include default devise modules. Others available are:
-	# :confirmable, :lockable, :timeoutable and :omniauthable
+	# :lockable, :timeoutable
 	devise :database_authenticatable, :registerable, :confirmable,
 			:recoverable, :rememberable, :trackable, :validatable,
 			:omniauthable
 
-	# attr_accessible :email, :password, :password_confirmation, :remember_me
-	# TODO: make this into strong parameters
 	belongs_to :address
+	belongs_to :network
 	has_many :payments
 	has_many :rides
 	has_many :authentications
-	belongs_to :network
-	has_one :api_key
 	has_many :intersts
 
 	def serializable_hash(options={})
-		super({ only: [:name, :phone, :service_type, :email, :picture] }.merge(options || {}))
+		super({ :only => [:name, :phone, :email, :picture]}.merge(options || {}))
+	end
+
+	def generate_api_key
+		begin
+			self.access_token = SecureRandom.hex
+		end while self.class.exists?(:access_token => access_token)
 	end
 
 	def find_or_initialize_by_omniauth(auth)
 		user = find_or_initialize_by_email(auth['info']['email'])
 		user.name = auth['info']['name']
 		user.picture = auth['info']['image']
-		authentications.build(:provider => auth['provider'], :uid => auth['uid'], :token => auth['extension']['token'])
+		authentications.build(
+			:provider => auth['provider'], 
+			:uid => auth['uid'], 
+			:token => auth['extension']['token'])
 	end
 
 	def apply_omniauth(auth)
 		# use cases:
-		# - new user sign up through omniauth (already checked email)
+		# - new user sign up through omniauth
+		#       already checked email for duplicate record
 		# - old user first time sign up through provider
 		# - old user logged in already, connecting provider
 		fb_email = auth['info']['email'].downcase
@@ -62,7 +55,7 @@ class User < ActiveRecord::Base
 					self.email = fb_email
 				end
 			end
-			# self.name = auth['info']['name'] # no need to update name
+			# self.name = auth['info']['name'] # Don't need to update name
 		end
 		self.picture = auth['info']['image']
 		self.authentications.build(:provider => auth['provider'], :uid => auth['uid'], :token => auth['extension']['token'])
@@ -81,9 +74,9 @@ class User < ActiveRecord::Base
 		return !(email.to_s =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i).nil?
 	end
 
-	def validate_network
-		domain = self.email.match(/(?<=@)(.*)(?=.edu)/).to_s.downcase
-		self.network = Network.find_by_domain(domain)
-		errors[:base] << "Invalid Network" if self.network.nil?
-	end
+	# def validate_network
+	# 	domain = self.email.match(/(?<=@)(.*)(?=.edu)/).to_s.downcase
+	# 	self.network = Network.find_by_domain(domain)
+	# 	errors[:base] << "Invalid Network" if self.network.nil?
+	# end
 end

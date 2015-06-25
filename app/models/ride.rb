@@ -8,8 +8,8 @@ class Ride < ActiveRecord::Base
 		@@status
 	end
 
-	# validates :bike_id, :start_location_id, :start_time, presence: true
-	validates :stop_location_id, :stop_time, presence: true, if: :status_complete?
+	validates_presence_of :bike_id, :start_location_id, :start_time
+	validates_presence_of :stop_location_id, :stop_time, if: :status_complete?
 
 	belongs_to :tran, class_name: "Transaction"
 	belongs_to :bike

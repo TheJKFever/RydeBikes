@@ -1,9 +1,7 @@
 class Api::TransactionsController < Api::ApiController
 	before_action :set_transaction, only: [:show, :edit, :update, :destroy]
 
-	respond_to :json
-
-	def index # returns all transactions methods for a particular user
+	def index # returns all transactions for a particular user
 		if current_user.admin?
 			@transactions = Transaction.all
 		else

@@ -7,7 +7,9 @@ namespace :db do
 		require 'populator'
 		require 'faker'
 		# erase database
-		Rake::Task['db:reset'].invoke
+		Rake::Task['db:drop'].invoke
+		Rake::Task['db:migrate'].invoke
+		Rake::Task['db:seed'].invoke
 
 		# populate fake data
 		BIKES = 20
@@ -124,11 +126,11 @@ namespace :db do
 
 		# create bikes
 		Bike.populate BIKES do |bike|
-			bike.status = [Bike.status[:reserved], Bike.status[:available]]
+			bike.status = [Bike::STATUS[:reserved], Bike::STATUS[:available]]
 			bike.location_id = 1..@locations.length
 			bike.model = 'alpha'
 			bike.network_id = 1..@networks.length
-			if (bike.status===Bike.status[:reserved])
+			if (bike.status===Bike::STATUS[:reserved])
 				bike.ride_id = 1..RIDES
 			end
 		end
@@ -139,8 +141,8 @@ namespace :db do
 			ride.user_id = 1..USERS
 			ride.start_location_id = 1..@locations.length
 			ride.start_time = 4.days.ago..1.minute.ago
-			ride.status = [Ride.status[:progress], Ride.status[:complete]]
-			if (ride.status === Ride.status[:complete])
+			ride.status = [Ride::STATUS[:progress], Ride::STATUS[:complete]]
+			if (ride.status === Ride::STATUS[:complete])
 				ride.stop_location_id = 1..@locations.length
 				ride.stop_time = Time.now
 			    ride.transaction_id = 1..RIDES
@@ -163,7 +165,7 @@ namespace :db do
 			@user.name = Faker::Name.name
 			@user.phone = Faker::PhoneNumber.phone_number
 			@user.address_id = 1 # just give them all the same address for now
-			@user.service_type = [ [User.service_type[:membership], User.service_type[:payperuse]].sample ]
+			# @user.service_type = [ [User.service_type[:membership], User.service_type[:payperuse]].sample ]
 			@user.email = [@user.name.delete(' ').downcase, @networks[rand(2)][:domain]].join('@') + '.edu'
 			@user.password = password
 			@user.network_id = 1..@networks.length
@@ -177,7 +179,7 @@ namespace :db do
 		@user.name = 'admin',
 		@user.phone = Faker::PhoneNumber.phone_number,
 		@user.address_id = 1, # just give them all the same address
-		@user.service_type = User.service_type[:compt],
+		# @user.service_type = User.service_type[:compt],
 		@user.email = 'rydebikes@usc.edu',
 		@user.password = password,
 		@user.network_id = 1,
