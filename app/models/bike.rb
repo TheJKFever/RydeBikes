@@ -1,11 +1,8 @@
 class Bike < ActiveRecord::Base
-	@@status = {
+	STATUS = {
 		:reserved => 'reserved',
 		:available => 'available'
 	}
-	def self.status
-		@@status
-	end
 
 	has_many :rides
 	belongs_to :network

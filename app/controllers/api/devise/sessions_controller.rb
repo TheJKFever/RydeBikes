@@ -1,8 +1,5 @@
 class Api::Devise::SessionsController < Devise::SessionsController
-  include ApiAuthentication
-  skip_before_filter :verify_authenticity_token
   before_filter :authenticate_apiKey, except: [:new, :create]
-
   # before_filter :configure_sign_in_params, only: [:create]
 
   # GET /resource/sign_in

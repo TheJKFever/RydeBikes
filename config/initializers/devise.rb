@@ -72,6 +72,9 @@ Devise.setup do |config|
   # Does not affect registerable.
   # config.paranoid = true
 
+  # Change the parent of the Devise Controllers
+  config.parent_controller = 'Api::ApiController'
+
   # By default Devise will store the user in session. You can skip storage for
   # particular strategies by setting this option.
   # Notice that if you are skipping storage for all authentication paths, you

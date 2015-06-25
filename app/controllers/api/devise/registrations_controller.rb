@@ -1,10 +1,7 @@
 class Api::Devise::RegistrationsController < Devise::RegistrationsController
-  include ApiAuthentication
-  skip_before_filter :verify_authenticity_token
   before_filter :authenticate_apiKey, except: [:new, :create]
-
-# before_filter :configure_sign_up_params, only: [:create]
-# before_filter :configure_account_update_params, only: [:update]
+  # before_filter :configure_sign_up_params, only: [:create]
+  # before_filter :configure_account_update_params, only: [:update]
 
   # GET /resource/sign_up
   def new
@@ -24,7 +21,7 @@ class Api::Devise::RegistrationsController < Devise::RegistrationsController
     else
       clean_up_passwords resource
       set_minimum_password_length
-      render :json => {:error => resource.errors}, :status => :internal_server_error
+      render :json => {:error => resource.errors.message}, :status => :internal_server_error
     end
   end
 
