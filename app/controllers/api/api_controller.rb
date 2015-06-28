@@ -1,11 +1,16 @@
+# All Api controllers should inherit from this class
 class Api::ApiController < ApplicationController
-  protect_from_forgery with: :null_session # CSRF protection for API
+  # remove session handling, allowing CSRF for API
+  protect_from_forgery with: :null_session
+  # requires Api key to move forward, redirects to login
   before_filter :authenticate_apiKey
+  # opens Api to all requests
   before_filter :set_headers_for_api
   # TODO: remove flash, assets, cookies, etc
 
   respond_to :json
-  layout nil # skip rendering layouts
+  # skip rendering layouts
+  layout nil
 
   ## DANGER PLEASE READ
   # set_headers_for_api makes this API publicly available to anyone on the internet
@@ -21,12 +26,15 @@ class Api::ApiController < ApplicationController
 
   def authenticate_apiKey
     if request.headers['X-Api-Key'].blank?
+      # fail!
       return render :json => { :error => "Please provide an API Key" }, :status => :unauthorized, :location => new_user_session_path 
     else
       @user = User.find_by_access_token(request.headers['X-Api-Key'])
       unless @user
+        # fail!
         return render :json => { :error => "Your API Key is incorrect or expired, please sign in again"}, :status => :unauthorized, :location => new_user_session_path
       end
+      # pass!
     end
   end  
 end

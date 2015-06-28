@@ -19,6 +19,7 @@ class Api::Devise::SessionsController < Devise::SessionsController
     else
       clean_up_passwords resource
       render :json => {:error => resource.errors.message}, :status => :internal_server_error
+    end
   end
 
   # protected
