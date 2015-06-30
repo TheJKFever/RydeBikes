@@ -12,6 +12,8 @@ class Api::ApiController < ApplicationController
   # skip rendering layouts
   layout nil
 
+  protected
+
   ## DANGER PLEASE READ
   # set_headers_for_api makes this API publicly available to anyone on the internet
   # Use caution to ensure every request is authenticated and does not respond with unathorized information

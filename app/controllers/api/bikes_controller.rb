@@ -1,5 +1,6 @@
 class Api::BikesController < Api::ApiController
   before_action :set_bike, only: [:reserve, :return]
+  skip_filter :authenticate_apiKey, only: [:pulse]
 
   # Takes in lat and long coord of user and radius
   # defaults to ipaddress location and 0.5 
@@ -90,7 +91,12 @@ class Api::BikesController < Api::ApiController
   #   end
   # end
 
+  def pulse
+    render :json => params, :status => :ok
+  end
+
   private
+
   def set_bike
     @bike = Bike.find(params[:id])
   end
