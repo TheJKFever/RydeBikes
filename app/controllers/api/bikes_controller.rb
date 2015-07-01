@@ -24,7 +24,7 @@ class Api::BikesController < Api::ApiController
   #   id: bike_id
   def reserve # Start Ride
     validates_has_payment_and_good_standing
-    render json: { error: "This bike is not available to reserve" } if (@bike.status != Bike.status[:available])
+    render json: { error: "This bike is not available to reserve" } if @bike.status != Bike.status[:available]
     @bike.status = Bike.status[:reserved]
     @ride = Ride.create(
       user_id: @user.id, 

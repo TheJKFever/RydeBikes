@@ -17,6 +17,8 @@ Rails.application.routes.draw do
     get  '/bikes'             => 'bikes#index' 
     post '/bikes/reserve' => 'bikes#reserve'
     post '/bikes/return'  => 'bikes#return'
+
+    post '/account/payments/create' => 'payments#create'
     # post '/bikes/interest' => 'bikes#interest'
     # resources :bikes
     # resources :rides
