@@ -83,5 +83,4 @@ namespace :db do
     @user.confirm!
     @user.save(validate: false)
   end
-  end
 end
