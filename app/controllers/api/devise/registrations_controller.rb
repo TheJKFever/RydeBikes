@@ -1,12 +1,7 @@
 class Api::Devise::RegistrationsController < Devise::RegistrationsController
-  include ApiAuthentication
-  skip_before_filter :verify_authenticity_token
   before_filter :authenticate_apiKey, except: [:new, :create]
-
-  respond_to :json
-
-# before_filter :configure_sign_up_params, only: [:create]
-# before_filter :configure_account_update_params, only: [:update]
+  # before_filter :configure_sign_up_params, only: [:create]
+  # before_filter :configure_account_update_params, only: [:update]
 
   # GET /resource/sign_up
   def new
@@ -14,29 +9,20 @@ class Api::Devise::RegistrationsController < Devise::RegistrationsController
   end
 
   # POST /resource
+  # sign up, creates a new user
   def create
-    build_resource(sign_up_params)
-
-    puts resource
+    resource = build_resource(sign_up_params)
+    resource.generate_new_api_key
     resource.save
     yield resource if block_given?
     if resource.persisted?
-      if resource.active_for_authentication?
-        sign_up(resource_name, resource)
-        @user = resource
-        respond_with @user.as_json({:include => :api_key}), location: after_sign_up_path_for(resource)
-      else
-        expire_data_after_sign_in!
-        @user = resource
-        respond_with @user.as_json({:include => :api_key}), location: after_inactive_sign_up_path_for(resource)
-      end
+      sign_up(resource_name, resource)
+      render json: resource.as_json, status: :ok, location: after_sign_up_path_for(resource)
     else
       clean_up_passwords resource
       set_minimum_password_length
-      respond_with resource
+      render json: { error: resource.errors.message }, status: :internal_server_error
     end
-
-    # render json: @user.as_json({:include => :api_key})
   end
 
   # GET /resource/edit
@@ -63,7 +49,7 @@ class Api::Devise::RegistrationsController < Devise::RegistrationsController
   #   super
   # end
 
-  # protected
+  protected
 
   # You can put the params you want to permit in the empty array.
   # def configure_sign_up_params

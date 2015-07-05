@@ -18,7 +18,8 @@ Rails.application.routes.draw do
     post '/bikes/reserve' => 'bikes#reserve'
     post '/bikes/return'  => 'bikes#return'
 
-    post '/account/payments/create' => 'payments#create'
+    get 'account/payments/client_token' => 'payments#client_token'
+    resources :payments, path: '/account/payments'
     # post '/bikes/interest' => 'bikes#interest'
     # resources :bikes
     # resources :rides
@@ -29,6 +30,8 @@ Rails.application.routes.draw do
       get 'sign_up',      to: 'devise/registrations#new', as: 'new_user_registration'
       post 'sign_up',     to: 'devise/registrations#create', as: 'user_registration'
     end
+
+    get 'bikes/:id/pulse' => 'bikes#pulse'
   end
 
   # The priority is based upon order of creation: first created -> highest priority.

@@ -1,15 +1,11 @@
 class Ride < ActiveRecord::Base
-	@@status = {
+	STATUS = {
 		:progress => "in progress",
 		:complete => "complete"
 	}
 
-	def self.status
-		@@status
-	end
-
-	# validates :bike_id, :start_location_id, :start_time, presence: true
-	validates :stop_location_id, :stop_time, presence: true, if: :status_complete?
+	validates_presence_of :bike_id, :start_location_id, :start_time
+	validates_presence_of :stop_location_id, :stop_time, if: :status_complete?
 
 	has_one :trans, class_name: "Transaction"
 	belongs_to :bike
@@ -17,8 +13,9 @@ class Ride < ActiveRecord::Base
 	belongs_to :start_location, class_name: 'Coordinate', foreign_key: "start_location_id"
 	belongs_to :stop_location, class_name: 'Coordinate', foreign_key: "stop_location_id"
 
+	# this should be put into the validation if
 	def status_complete?
-		return (self.status == @@status[:complete])
+		return (self.status == STATUS[:complete])
 	end
 
 	def calculate_cost

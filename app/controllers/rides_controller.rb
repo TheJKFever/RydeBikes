@@ -30,7 +30,7 @@ class RidesController < ApplicationController
 		@ride = Ride.new(ride_params)
 		if @ride.save
 			@bike = @ride.bike
-			if @bike.update(status: Bike.status[:reserved])
+			if @bike.update(status: Bike::STATUS[:reserved])
 				render json: @ride
 			else
 				render json: { error: @bike.errors.full_messages }

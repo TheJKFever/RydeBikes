@@ -1,4 +1,6 @@
 class Api::Devise::UnlocksController < Devise::UnlocksController
+  before_filter :authenticate_apiKey, :except => [:new, :create, :show]
+
   # GET /resource/unlock/new
   # def new
   #   super

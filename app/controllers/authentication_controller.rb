@@ -8,7 +8,7 @@ class AuthenticationController < ApplicationController
 
   def signin_fb
     auth = request.env['omniauth.auth']
-    # Request a new 60 day token using the current 2 hour token obtained from fb, why not
+    # Request a new 60 day token using the current 2 hour token
     auth.merge!(extend_fb_token(auth['credentials']['token']))
     logger.debug "Auth variable: #{auth.inspect}"
 

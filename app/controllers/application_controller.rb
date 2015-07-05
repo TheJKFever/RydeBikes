@@ -25,10 +25,24 @@ class ApplicationController < ActionController::Base
   def authenticate_admin!
     if !current_user || !current_user.admin?
       respond_to do |format|
-        format.html redirect_to root_path, flash[:alert] = 'Must have administrative priviledges'
-        format.json { render { error: 'Must have administrative priviledges' }
+        format.html redirect_to root_path, :alert => 'Must have administrative priviledges'
+        format.json render json: { error: 'Must have administrative priviledges' }
       end
     end
-    # return render json: { error: 'Must have administrative priviledges' } if (!current_user || !current_user.admin?)
   end
 end
+
+
+# Sign up / facebook
+# confirm email
+#   can't login until confirmed
+# get profile information
+#   what's required?
+# get payment method
+# first_time_user intro (set flag)
+
+# request bike for first time
+
+
+# payment_method_in_good_standing
+# payout_method_in_good_standing

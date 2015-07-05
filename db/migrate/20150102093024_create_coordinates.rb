@@ -1,11 +1,13 @@
 class CreateCoordinates < ActiveRecord::Migration
-	def change
-		create_table :coordinates do |t|
-			t.float :latitude
-			t.float :longitude
-  			t.integer :network_id
-  			t.string :name
-  			t.string :full_address
-		end
-	end
+  def change
+    create_table :coordinates do |t|
+      t.integer :network_id
+      t.float :latitude
+      t.float :longitude
+      t.string :name
+      t.string :full_address
+    end
+    add_index :coordinates, :network_id
+    add_index :coordinates, [:latitude, :longitude]
+  end
 end
