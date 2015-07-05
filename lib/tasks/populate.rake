@@ -4,7 +4,7 @@ namespace :db do
   desc "Erase, setup, and initialize development database"
   task :populate => :environment do
     # erase database
-    Rake::Task['db:drop'].invoke
+    Rake::Task['db:drop'].invoke if Rails.env != 'production'
     Rake::Task['db:migrate'].invoke
     Rake::Task['db:seed'].invoke
 
@@ -82,5 +82,6 @@ namespace :db do
     @user.admin = true
     @user.confirm!
     @user.save(validate: false)
+  end
   end
 end
