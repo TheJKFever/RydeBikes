@@ -1,10 +1,12 @@
 class AuthenticationController < ApplicationController
+  before_action
+  # TODO: should respond_to |format|
+
   def create
-    puts params
-    if params[:provider] == "facebook"
-      signin_fb
-    end
+    signin_fb if params[:provider] == "facebook"
   end
+
+  private
 
   def signin_fb
     auth = request.env['omniauth.auth']
@@ -12,30 +14,32 @@ class AuthenticationController < ApplicationController
     auth.merge!(extend_fb_token(auth['credentials']['token']))
     logger.debug "Auth variable: #{auth.inspect}"
 
-    # Already logged in with this fb account before?
     authentication = Authentication.find_by_provider_and_uid(auth['provider'], auth['uid'])
     if (authentication)
+      # Already logged in with this fb account before
       authentication.update_attribute("token", auth['extension']['token'])
-      user = authentication.user
+      @user = authentication.user
     else
+      # First time seeing this provider, uid
       # use email to see if already registered, if not create new user
-      user = User.find_or_initialize_by(email: auth['info']['email'].downcase)
-      user.apply_omniauth(auth) # builds authentication object for user
+      @user = User.find_or_initialize_by(email: auth['info']['email'].downcase)
+      @user.password = Devise.friendly_token[0,20] if @user.encrypted_password.blank?
+      # TODO: set a flag here saying that the password is temporary
+      @user.apply_omniauth(auth['provider'], auth) # builds authentication object for user
     end
-    saved_status = user.save(:validate=> false)
 
-    # Add the new token and expiration date to the user's session
-    create_or_refresh_fb_session(auth)
-
-    if (saved_status)
-      user = authentication ? authentication.user : user
+    if @user.save
+      # Add the new token and expiration date to the user's session
+      create_or_refresh_fb_session(auth)
       puts session
-      sign_in_and_redirect(:user, user)
-    else # could not save unvalidated user... 
-      render :json => { :errors => user.errors.messages }
+      sign_in_and_redirect(:user, @user)
+    else
+      render :json => { :errors => user.errors }
     end
   end
 
+  # Assumes already logged in to application
+  # should validate user.authentications !includes facebook
   def connect_fb
     auth = request.env['omniauth.auth']
     # Request a new 60 day token using the current 2 hour token obtained from fb, why not
@@ -45,17 +49,19 @@ class AuthenticationController < ApplicationController
     # Already logged in with this fb account before?
     authentication = Authentication.find_by_provider_and_uid(auth['provider'], auth['uid'])
     if (authentication)
+      # Trying to connect facebook account to regular account.
+      # But have already logged in with this facebook acount before.
+      # This should never happen...
       authentication.update_attribute("token", auth['extension']['token'])
-      current_user.authentications << authentication
     else
-      current_user.apply_omniauth(auth) # builds authentication object for user
+      current_user.apply_omniauth(auth['provider'], auth) # builds authentication object for user
+      if current_user.save
+        # Add the new token and expiration date to the user's session
+        create_or_refresh_fb_session(auth)
+      else
+        render :json => { :errors => current_user.errors }
+      end
     end
-    saved_status = current_user.save
-
-    # Add the new token and expiration date to the user's session
-    create_or_refresh_fb_session(auth)
-
-    render :json => { :success => saved_status }
   end
 
   def destroy
@@ -68,8 +74,9 @@ class AuthenticationController < ApplicationController
   end
 
   def signout_fb
-    success = delete_fb_session && sign_out(:user)
-    render :json => { :success => success.as_json }
+    if delete_fb_session && sign_out(:user)
+      render :json => { :success => "You have been signed out." }
+    end
   end
 
   def create_or_refresh_fb_session(auth_hash_or_extension_hash)

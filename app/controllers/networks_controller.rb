@@ -1,6 +1,6 @@
 class NetworksController < ApplicationController
-	before_filter :authenticate_user!
-	before_filter :authenticate_admin!, :except => [:index, :show]
+	before_action :authenticate_user!
+	before_action :authenticate_admin!, :except => [:index, :show]
 	before_action :set_network, only: [:show, :edit, :update, :destroy]
 
 	respond_to :json

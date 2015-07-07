@@ -21,6 +21,7 @@
 .rspec
 /public/system
 /coverage/
+design.rdoc
 
 config/secrets.yml
 

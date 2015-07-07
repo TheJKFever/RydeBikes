@@ -1,80 +1,96 @@
-class Api::Devise::RegistrationsController < Devise::RegistrationsController
-  before_filter :authenticate_apiKey, except: [:new, :create]
-  # before_filter :configure_sign_up_params, only: [:create]
-  # before_filter :configure_account_update_params, only: [:update]
+class Api::Devise::RegistrationsController < Api::ApiController
+  skip_before_action :authenticate_apiKey, only: [:create]
+  skip_before_action :validate_login_process, only: [:create]
 
-  # GET /resource/sign_up
-  def new
-    super
-  end
-
-  # POST /resource
-  # sign up, creates a new user
+  # POST /api/sign_up
   def create
-    resource = build_resource(sign_up_params)
-    resource.generate_new_api_key
-    resource.save
-    yield resource if block_given?
-    if resource.persisted?
-      sign_up(resource_name, resource)
-      render json: resource.as_json, status: :ok, location: after_sign_up_path_for(resource)
+    user = User.new(sign_up_params)
+    user.save
+    if user.persisted?
+      # if user.active_for_authentication?
+        user.generate_new_api_key
+        sign_in(user)
+        render json: user, location: after_sign_up_path_for(user)
+      # else
+      #   expire_data_after_sign_in!
+      #   message = find_message("signed_up_but_#{user.inactive_message}")
+      #   render json: { error: message, user: resource }, location: after_inactive_sign_up_path_for(resource)
+      # end
     else
       clean_up_passwords resource
       set_minimum_password_length
-      render json: { error: resource.errors.message }, status: :internal_server_error
+      render json: { error: user.errors }, status: :unprocessable_entity
     end
   end
 
-  # GET /resource/edit
-  # def edit
-  #   super
-  # end
-
-  # PUT /resource
-  # def update
-  #   super
-  # end
-
-  # DELETE /resource
-  # def destroy
-  #   super
-  # end
-
-  # GET /resource/cancel
-  # Forces the session data which is usually expired after sign
-  # in to be expired now. This is useful if the user wants to
-  # cancel oauth signing in/up in the middle of the process,
-  # removing all OAuth session data.
-  # def cancel
-  #   super
-  # end
+  # PUT /api/profile
+  def update
+    # self.resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)
+    # prev_unconfirmed_email = resource.unconfirmed_email if resource.respond_to?(:unconfirmed_email)
+    if @user.update_attribute(account_update_params)
+      # kind = update_needs_confirmation?(resource, prev_unconfirmed_email) ?
+      #   :update_needs_confirmation : :updated
+      # message = find_message(kind)
+      sign_in @user, bypass: true
+      render json: { user: @user }, location: after_update_path_for(@user)
+    else
+      clean_up_passwords @user
+      render json: { error: @user.errors }, status: :unprocessable_entity
+    end
+  end
 
   protected
 
-  # You can put the params you want to permit in the empty array.
-  # def configure_sign_up_params
-  #   devise_parameter_sanitizer.for(:sign_up) << :attribute
+  # def update_needs_confirmation?(resource, previous)
+  #   resource.respond_to?(:pending_reconfirmation?) &&
+  #     resource.pending_reconfirmation? &&
+  #     previous != resource.unconfirmed_email
   # end
 
-  # You can put the params you want to permit in the empty array.
-  # def configure_account_update_params
-  #   devise_parameter_sanitizer.for(:account_update) << :attribute
+  # By default we want to require a password checks on update.
+  # You can overwrite this method in your own RegistrationsController.
+  # def update_resource(resource, params)
+  #   resource.update_with_password(params)
   # end
 
-  # The path used after sign up.
-  # def after_sign_up_path_for(resource)
-  #   super(resource)
+  # Build a devise resource passing in the session. Useful to move
+  # temporary session data to the newly created user.
+  # def build_resource(hash=nil)
+  #   self.resource = resource_class.new_with_session(hash || {}, session)
   # end
 
-  # The path used after sign up for inactive accounts.
+  # Signs in a user on sign up. You can overwrite this method in your own
+  # RegistrationsController.
+  # def sign_up(resource_name, resource)
+  #   sign_in(resource_name, resource)
+  # end
+
+  # The path used after sign up. You need to overwrite this method
+  # in your own RegistrationsController.
+  def after_sign_up_path_for(resource)
+    # TODO: change this for get_basic_user_info
+    after_sign_in_path_for(resource)
+  end
+
+  # The path used after sign up for inactive accounts. You need to overwrite
+  # this method in your own RegistrationsController.
   # def after_inactive_sign_up_path_for(resource)
-  #   super(resource)
+  #   scope = Devise::Mapping.find_scope!(resource)
+  #   router_name = Devise.mappings[scope].router_name
+  #   context = router_name ? send(router_name) : self
+  #   context.respond_to?(:root_path) ? context.root_path : "/"
   # end
 
-  # Sets minimum password length to show to user
-  def set_minimum_password_length
-    if devise_mapping.validatable?
-      @minimum_password_length = resource_class.password_length.min
-    end
+  # The default url to be used after updating a resource.
+  def after_update_path_for(resource)
+    signed_in_root_path(resource)
+  end
+
+  def sign_up_params
+    params.require(:user).permit(:username, :email, :password, :password_confirmation)
+  end
+
+  def account_update_params
+    params.require(:user).permit(:username, :email, :password, :password_confirmation)
   end
 end

@@ -1,6 +1,6 @@
 class TransactionsController < ApplicationController
-	before_filter :authenticate_user!
-	before_filter :authenticate_admin!, :except => [:index, :show, :new, :create]
+	before_action :authenticate_user!
+	before_action :authenticate_admin!, :except => [:index, :show, :new, :create]
 	before_action :set_transaction, only: [:show, :edit, :update, :destroy]
 
 	respond_to :json

@@ -1,3 +1,4 @@
+# Controller that interfaces with Braintree Transaction objects
 class Api::TransactionsController < Api::ApiController
 	before_action :set_transaction, only: [:show, :edit, :update, :destroy]
 

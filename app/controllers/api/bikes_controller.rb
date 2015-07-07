@@ -1,6 +1,6 @@
 class Api::BikesController < Api::ApiController
   before_action :set_bike, only: [:reserve, :return]
-  skip_filter :authenticate_apiKey, only: [:pulse]
+  skip_before_action :authenticate_apiKey, only: [:pulse]
 
   # Takes in lat and long coord of user and radius
   # defaults to ipaddress location and 0.5 
@@ -22,16 +22,15 @@ class Api::BikesController < Api::ApiController
   #   X-Api-Key: api_key
   #   id: bike_id
   def reserve # Start Ride
-    validates_has_payment_and_good_standing
-    render json: { error: "This bike is not available to reserve" } if @bike.status != Bike::STATUS[:available]
+    render json: { error: @user.errors }, status: :payment_required, location: new_payment_path if !@user.validates_has_payment_and_good_standing
+    render json: { error: "This bike is not available to reserve" }, status: :forbidden if @bike.status != Bike::STATUS[:available]
     @bike.status = Bike::STATUS[:reserved]
-    @ride = Ride.create(
+    @bike.current_ride = Ride.create(
       user_id: @user.id, 
       bike_id: @bike.id, 
       start_location: @bike.location, 
       start_time: DateTime.now, 
       status: Ride::STATUS[:progress])
-    @bike.current_ride = @ride
     if @bike.save
       render :json => @bike
     else
@@ -47,40 +46,38 @@ class Api::BikesController < Api::ApiController
   #   payment_method_nonce: braintree token
   def return # End Ride
     @ride = @bike.current_ride
-    render json: { error: 'Could not find the current ride associated with this bike' }, 
-      status: 404 if @ride.nil?
-    # This should never happen...
+    render json: { error: 'Could not find the current ride associated with this bike' }, status: :not_found if @ride.nil?
     render json: { error: 'Cannot return a bike that is not reserved' }, 
-      status: 401 if (@bike.status != Bike::STATUS[:reserved])
+      status: :forbidden if (@bike.status != Bike::STATUS[:reserved])
     render json: { error: 'You are not the current owner of this bike' }, 
-      status: 401 if (@user != @ride.user)
+      status: :forbidden if (@user != @ride.user)
 
     # TODO: get name for this location by nearest Coordinate with name...
     @location = Coordinate.find_or_initialize_by(latitude: params[:latitude], longitude: params[:longitude])
-    render :json => { :error => @location.errors.full_messages } if !@location.valid?
-    @location.save
+    render :json => { :error => @location.errors.full_messages } unless @location.save
     
     @ride.stop_location = @location, 
     @ride.stop_time = DateTime.now, 
     @ride.status = Ride::STATUS[:complete]
-    render :json => { :error => @ride.errors.full_messages } if !@ride.valid?
+    render :json => { :error => @ride.errors.full_messages } unless @ride.save
 
-    # Charge for ride
-    if @user.service_type === User.service_type[:payperuse]
-      if Transaction.charge_user_for_ride(@user, @ride)
-        # TODO: Finish this
-      else
-        # TODO: What happens if transaction failse
-        # @user.status === User.status[:badperson]
-      end
+    # CHARGE FOR RIDE
+    begin
+      # TODO: Finish this
+      @transaction = Transaction.charge_user_for_ride(@user, @ride)
+      @transaction.save!
+    # put specific rescues here
+    rescue Exception => e
+      render json: { error: e }, status: :internal_server_error
+      # TODO: What happens if transaction fails
+      # @user.status === User::STATUS[:outstanding]
+    else
+      @bike.status = Bike::STATUS[:available]
+    ensure
+      @bike.location = @location
+      @bike.current_ride = nil
+      render json: { error: @bike.errors.full_messages } unless @bike.save
     end
-
-    @bike.status = Bike::STATUS[:available]
-    @bike.location = @location
-    @bike.current_ride = nil
-    render json: { error: @bike.errors.full_messages } if !@bike.valid?    
-
-    @bike.save
     # TODO: make this @ride.summary
     render :json => @ride.to_json if @ride.save
   end

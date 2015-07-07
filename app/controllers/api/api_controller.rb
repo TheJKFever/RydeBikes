@@ -2,15 +2,29 @@
 class Api::ApiController < ApplicationController
   # remove session handling, allowing CSRF for API
   protect_from_forgery with: :null_session
-  # requires Api key to move forward, redirects to login
-  before_filter :authenticate_apiKey
+  # requires Api key to move forward
+  skip_before_action :authenticate_user!
   # opens Api to all requests
-  before_filter :set_headers_for_api
+  before_action :set_headers_for_api
+  before_action :authenticate_apiKey
+  before_action :validate_login_process
+
   # TODO: remove flash, assets, cookies, etc
 
   respond_to :json
   # skip rendering layouts
-  layout nil
+  layout nil  
+
+  def after_sign_in_path_for(api_resources)
+    '/api' + super
+  end
+
+  def validate_login_process
+    # temporarily returning true until futhur notice
+    return true
+    path, error = validate_login_process_for(@user)
+    render json: { error: error }, status: :unauthorized,  location: '/api' +path if error.present?
+  end
 
   protected
 
@@ -26,49 +40,12 @@ class Api::ApiController < ApplicationController
     headers['Access-Control-Max-Age'] = '86400'
   end
 
+  # X-Api-Key is sent in header and
+  # @user exists with that key
   def authenticate_apiKey
-    if request.headers['X-Api-Key'].blank?
+    unless request.headers['X-Api-Key'].present? && @user = User.find_by_access_token(request.headers['X-Api-Key'])
       # fail!
-      return render :json => { :error => "Please provide an API Key" }, :status => :unauthorized, :location => new_user_session_path 
-    else
-      @user = User.find_by_access_token(request.headers['X-Api-Key'])
-      unless @user
-        # fail!
-        return render :json => { :error => "Your API Key is incorrect or expired, please sign in again"}, :status => :unauthorized, :location => new_user_session_path
-      end
-      # pass!
-    end
-  end
-
-  def validates_has_payment_and_good_standing
-    puts "validates_has_payment_and_good_standing received: " + @user.name.to_s
-    if @user.status != User::STATUS[:goodstanding]
-      return render json: { error: "Users's status is '#{@user.status}'. Please contact us to resolve this issue" }, status: :unauthorized
-    end
-    if @user.braintree_token.nil?
-      return render json: { error: 'User has not added a payment method. Please add a valid payment method.' }, status: :unauthorized
-    end
-    begin
-      @customer = Braintree::Customer.find(@user.braintree_token)
-      # Check if customer has any payment_method
-      if @customer.payment_methods.empty?
-        return render json: { error: 'Braintree customer account created, but no payment added. Please add a valid payment method.'}, status: :unauthorized
-      end
-      puts @customer.inspect
-    rescue Braintree::NotFoundError
-      return render json: { error: 'User has not added a payment method. Please add a valid payment method.' }, status: :unauthorized
-    end
-  end
-
-  def get_default_payment_method
-    begin
-      @customer = Braintree::Customer.find(@user.braintree_token)
-      # get default payment_method of customer
-      @customer.payment_methods.each do |payment|
-        return payment if payment.default?
-      end
-    rescue Braintree::NotFoundError
-      return render json: { error: 'User has not added a payment method. Please add a valid payment method.' }, status: :unauthorized
+      return render :json => { :error => "Please provide a valid API Key" }, :status => :unauthorized, :location => new_user_session_path 
     end
   end
 end

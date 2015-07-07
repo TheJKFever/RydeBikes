@@ -21,13 +21,6 @@ ActiveRecord::Schema.define(version: 20150211215205) do
     t.string "state"
   end
 
-  create_table "api_keys", force: :cascade do |t|
-    t.string   "access_token"
-    t.integer  "user_id"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
-  end
-
   create_table "authentications", force: :cascade do |t|
     t.integer "user_id"
     t.string  "provider"
@@ -78,18 +71,6 @@ ActiveRecord::Schema.define(version: 20150211215205) do
 
   add_index "networks", ["domain"], name: "index_networks_on_domain"
 
-  create_table "payments", force: :cascade do |t|
-    t.string   "token"
-    t.integer  "user_id"
-    t.string   "status"
-    t.string   "payment_type"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
-  end
-
-  add_index "payments", ["token"], name: "index_payments_on_token"
-  add_index "payments", ["user_id"], name: "index_payments_on_user_id"
-
   create_table "rides", force: :cascade do |t|
     t.integer  "bike_id"
     t.integer  "user_id"
@@ -108,7 +89,7 @@ ActiveRecord::Schema.define(version: 20150211215205) do
   add_index "rides", ["user_id"], name: "index_rides_on_user_id"
 
   create_table "transactions", force: :cascade do |t|
-    t.integer  "payment_id"
+    t.integer  "cc_id"
     t.string   "payment_type"
     t.integer  "user_id"
     t.integer  "ride_id"
@@ -119,7 +100,6 @@ ActiveRecord::Schema.define(version: 20150211215205) do
     t.datetime "updated_at",   null: false
   end
 
-  add_index "transactions", ["payment_id"], name: "index_transactions_on_payment_id"
   add_index "transactions", ["ride_id"], name: "index_transactions_on_ride_id"
   add_index "transactions", ["user_id"], name: "index_transactions_on_user_id"
 
@@ -131,9 +111,11 @@ ActiveRecord::Schema.define(version: 20150211215205) do
     t.string   "phone"
     t.integer  "address_id"
     t.string   "status"
-    t.string   "email",                  default: "",    null: false
+    t.string   "username",               default: "",    null: false
+    t.string   "email"
     t.string   "encrypted_password",     default: "",    null: false
-    t.string   "braintree_token"
+    t.string   "braintree_id"
+    t.boolean  "first_time_login",       default: true
     t.string   "access_token"
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
@@ -143,18 +125,14 @@ ActiveRecord::Schema.define(version: 20150211215205) do
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.string   "confirmation_token"
-    t.datetime "confirmed_at"
-    t.datetime "confirmation_sent_at"
-    t.string   "unconfirmed_email"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   add_index "users", ["access_token"], name: "index_users_on_access_token", unique: true
-  add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
   add_index "users", ["email"], name: "index_users_on_email", unique: true
   add_index "users", ["network_id"], name: "index_users_on_network_id"
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  add_index "users", ["username"], name: "index_users_on_username", unique: true
 
 end

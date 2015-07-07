@@ -1,3 +1,4 @@
+# Controller that interfaces with Braintree Customer Objects
 class Api::PaymentsController < Api::ApiController
   # before_action :set_payment, only: [:show, :edit, :update, :destroy]
 
@@ -5,6 +6,9 @@ class Api::PaymentsController < Api::ApiController
 
   def new
     render json: { braintree: Braintree::ClientToken.generate } 
+  end
+
+  def list # get a list of all customers payment methods (credit cards)
   end
 
   def create

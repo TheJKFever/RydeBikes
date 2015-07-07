@@ -1,5 +1,5 @@
 class HomeController < ApplicationController
-	# before_filter :authenticate_user!, :except => :login
+	# before_action :authenticate_user!, :except => :login
 
 	def login
 	end

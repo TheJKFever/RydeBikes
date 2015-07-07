@@ -1,5 +1,5 @@
 class RidesController < ApplicationController
-	before_filter :authenticate_user!
+	before_action :authenticate_user!
 	before_action :set_ride, only: [:show, :edit, :finish, :update, :destroy]
 
 	respond_to :json

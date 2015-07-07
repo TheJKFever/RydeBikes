@@ -56,31 +56,33 @@ namespace :db do
     # end
       
     USERS.times do
-      @user = User.new
-      @user.name = Faker::Name.name
-      @user.phone = Faker::PhoneNumber.phone_number
-      @user.address_id = 1 # just give them all the same address for now
-      # @user.service_type = [ [User.service_type[:membership], User.service_type[:payperuse]].sample ]
-      @user.email = [@user.name.delete(' ').downcase, Network.all.sample[:domain]].join('@') + '.edu'
-      @user.password = password
-      @user.network_id = 1..Network.count
-      @user.admin = false
-      @user.status = User::STATUS.values
-      @user.confirm!
-      @user.save(validate: false)
+      user = User.new
+      user.username = Faker::Internet.user_name
+      user.name = Faker::Name.name
+      user.phone = Faker::PhoneNumber.phone_number
+      user.address_id = 1 # just give them all the same address for now
+      # user.service_type = [ [User.service_type[:membership], User.service_type[:payperuse]].sample ]
+      user.email = [user.name.delete(' ').downcase, Network.all.sample[:domain]].join('@') + '.edu'
+      user.password = password
+      user.network_id = (1..Network.count).to_a.sample
+      user.admin = false
+      user.status = User::STATUS.values.sample
+      # user.confirm!
+      user.save(validate: false)
     end
 
     # create an admin user
-    @user = User.new
-    @user.name = 'admin'
-    @user.phone = Faker::PhoneNumber.phone_number
-    @user.address_id = 1 # just give them all the same address
-    # @user.service_type = User.service_type[:compt],
-    @user.email = 'rydebikes@usc.edu'
-    @user.password = password
-    @user.network_id = 1
-    @user.admin = true
-    @user.confirm!
-    @user.save(validate: false)
+    user = User.new
+    user.username = Faker::Internet.user_name
+    user.name = 'admin'
+    user.phone = Faker::PhoneNumber.phone_number
+    user.address_id = 1 # just give them all the same address
+    # user.service_type = User.service_type[:compt],
+    user.email = 'rydebikes@usc.edu'
+    user.password = password
+    user.network_id = 1
+    user.admin = true
+    # user.confirm!
+    user.save(validate: false)
   end
 end

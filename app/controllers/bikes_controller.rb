@@ -1,6 +1,6 @@
 class BikesController < ApplicationController
-  before_filter :authenticate_user!
-	before_filter :authenticate_admin!, except: [:index, :show, :reserve]
+  before_action :authenticate_user!
+	before_action :authenticate_admin!, except: [:index, :show, :reserve]
   before_action :set_bike, except: [:index, :create, :new]
 
   # AVAILABLE TO USERS
