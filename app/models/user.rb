@@ -104,7 +104,7 @@ class User < ActiveRecord::Base
   #   render Braintree::ClientToken.generate(:customer_id => braintree_id)
   #   then use client sdk to communicate with Braintree
   def has_payment_method?
-    if braintree_token.nil?
+    if braintree_id.nil?
       self.errors[:base] << "User has not added a payment method. Please add a valid payment method."
       return false
     end
@@ -135,9 +135,9 @@ class User < ActiveRecord::Base
   # returns braintree customer object or nil
   def get_braintree_customer
     begin
-      return Braintree::Customer.find(braintree_token)
+      return Braintree::Customer.find(braintree_id)
     rescue Braintree::NotFoundError
-      update_attributes(:braintree_token => nil)
+      update_attributes(:braintree_id => nil)
       self.errors[:base] << "Invalid Braintree token. Please update payment methods."
       return nil
     end

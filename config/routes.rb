@@ -22,8 +22,8 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: 'json' } do
     get  '/bikes'             => 'bikes#index' 
-    post '/bikes/reserve' => 'bikes#reserve'
-    post '/bikes/return'  => 'bikes#return'
+    post '/bikes/reserve/:id' => 'bikes#reserve'
+    post '/bikes/return/:id'  => 'bikes#return'
 
     get 'account/payments/client_token' => 'payments#client_token'
     resources :payments, path: '/account/payments'

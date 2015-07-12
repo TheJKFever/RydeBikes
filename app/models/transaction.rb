@@ -1,4 +1,10 @@
 class Transaction < ActiveRecord::Base
+	METHODS = {
+		:subscription => "subscription",
+		:prepay => "prepay",
+		:pay_per_use => "pay_per_use"
+	}
+	
 	belongs_to :payment
 	belongs_to :user
 	belongs_to :ride
@@ -21,4 +27,8 @@ class Transaction < ActiveRecord::Base
 		@transaction.details = response
 
 	end
+
+	class Rejected < Exception
+	end
+
 end

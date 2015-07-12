@@ -21,22 +21,38 @@ class Api::BikesController < Api::ApiController
   # Expected params:
   #   X-Api-Key: api_key
   #   id: bike_id
-  def reserve # Start Ride
-    render json: { error: @user.errors }, status: :payment_required, location: new_payment_path if !@user.validates_has_payment_and_good_standing
-    render json: { error: "This bike is not available to reserve" }, status: :forbidden if @bike.status != Bike::STATUS[:available]
-    @bike.status = Bike::STATUS[:reserved]
-    @bike.current_ride = Ride.create(
-      user_id: @user.id, 
-      bike_id: @bike.id, 
-      start_location: @bike.location, 
-      start_time: DateTime.now, 
-      status: Ride::STATUS[:progress])
-    if @bike.save
-      render :json => @bike
-    else
-      render :json => { :error => @bike.errors.full_messages }
+    def reserve # Start Ride
+      return render json: { error: "This bike is not available to reserve" }, status: :forbidden if @bike.status != Bike::STATUS[:available]
+      begin
+        Bike.transaction do
+          @bike.status = Bike::STATUS[:reserved]
+          @bike.current_ride = Ride.create(
+            user_id: @user.id, 
+            bike_id: @bike.id, 
+            start_location: @bike.location, 
+            start_time: DateTime.now, 
+            status: Ride::STATUS[:progress])
+          # Check payment
+          payment_type = params[:payment_type]
+          if payment_type === Transaction::METHODS[:subscription]
+            return render json: { error: "Subscription has not been implemented yet" }, status: :bad_request
+          else
+            return render json: { error: @user.errors }, status: :payment_required, location: new_payment_path unless @user.validates_has_payment_and_good_standing
+            if payment_type === Transaction::METHODS[:prepay]
+              @bike.current_ride.trans = Transaction.charge_user_for_ride(@user, @bike.current_ride, payment_type)
+            else # :per_minute
+              # put pay_per_minute logic here
+            end
+          end
+          @bike.save!
+        end
+      rescue ActiveRecord::RecordInvalid => exception
+        render :json => { :error => exception.messages }, status: :unprocessable_entity
+      rescue Transaction::Rejected => error
+      rescue => error
+        # handle some other exception
+      end
     end
-  end
 
   # Expected params:
   #   X-Api-Key: api_key
