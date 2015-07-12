@@ -26,10 +26,21 @@ class Api::PaymentsController < Api::ApiController
   end
 
   def client_token
-    validates_has_payment_and_good_standing
-    Braintree::ClientToken.generate(
-      :customer_id => @user.braintree_token
-    )
+    begin
+      validates_payment_and_good_standing
+      client_token = Braintree::ClientToken.generate(
+        :customer_id => @user.braintree_token
+      )
+      render json: { braintree_client_token: client_token }, status: :ok
+    rescue User::NoPaymentMethodException => exception
+      return render json: { error: @user.errors }, 
+        status: :payment_required, 
+        location: api_new_payment_path
+    rescue User::OutStandingBalanceException => exception
+      return render json: { error: @user.errors }, 
+        status: :forbidden, 
+        location: api_collections_path
+    end
   end
 
   private

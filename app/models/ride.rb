@@ -13,6 +13,15 @@ class Ride < ActiveRecord::Base
 	belongs_to :start_location, class_name: 'Coordinate', foreign_key: "start_location_id"
 	belongs_to :stop_location, class_name: 'Coordinate', foreign_key: "stop_location_id"
 
+	def self.build_from_user_bike(user, bike)
+    new(
+	    user_id: user.id, 
+	    bike_id: bike.id, 
+	    start_location: bike.location, 
+	    start_time: DateTime.now, 
+	    status: Ride::STATUS[:progress])
+	end
+
 	# this should be put into the validation if
 	def status_complete?
 		return (self.status == STATUS[:complete])

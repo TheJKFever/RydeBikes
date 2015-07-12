@@ -12,7 +12,7 @@ class Api::BikesController < Api::ApiController
     # puts coordinates
     # @bikes = Coordinate.near(coordinates, radius).joins(:bikes)
     @bikes = Bike.where(status: Bike::STATUS[:available])
-    render :json => @bikes
+    render json: @bikes
   end
 
   # Dont let a user reserve a bike unless they have
@@ -24,20 +24,16 @@ class Api::BikesController < Api::ApiController
     def reserve # Start Ride
       return render json: { error: "This bike is not available to reserve" }, status: :forbidden if @bike.status != Bike::STATUS[:available]
       begin
-        Bike.transaction do
+        ActiveRecord::Base.transaction do
           @bike.status = Bike::STATUS[:reserved]
-          @bike.current_ride = Ride.create(
-            user_id: @user.id, 
-            bike_id: @bike.id, 
-            start_location: @bike.location, 
-            start_time: DateTime.now, 
-            status: Ride::STATUS[:progress])
+          @bike.current_ride = Ride.build_from_user_bike(@user, @bike)
           # Check payment
           payment_type = params[:payment_type]
           if payment_type === Transaction::METHODS[:subscription]
+            raise ActiveRecord::Rollback
             return render json: { error: "Subscription has not been implemented yet" }, status: :bad_request
           else
-            return render json: { error: @user.errors }, status: :payment_required, location: new_payment_path unless @user.validates_has_payment_and_good_standing
+            @user.validates_payment_and_good_standing
             if payment_type === Transaction::METHODS[:prepay]
               @bike.current_ride.trans = Transaction.charge_user_for_ride(@user, @bike.current_ride, payment_type)
             else # :per_minute
@@ -46,11 +42,19 @@ class Api::BikesController < Api::ApiController
           end
           @bike.save!
         end
+      rescue User::NoPaymentMethodException => exception
+        render json: { error: exception.message }, 
+          status: :payment_required, 
+          location: api_new_payment_path
+      rescue User::OutStandingBalanceException => exception
+        render json: { error: exception.message }, 
+          status: :forbidden, 
+          location: api_collections_path
       rescue ActiveRecord::RecordInvalid => exception
-        render :json => { :error => exception.messages }, status: :unprocessable_entity
+        render :json => { :error => exception.message }, status: :unprocessable_entity
       rescue Transaction::Rejected => error
-      rescue => error
-        # handle some other exception
+      else
+        render json: {bike: @bike, transction: @bike.current_ride.trans}
       end
     end
 

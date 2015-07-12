@@ -66,8 +66,8 @@ class User < ActiveRecord::Base
     end
   end
 
-  def validates_has_payment_and_good_standing
-    return true if (has_payment_method? && in_good_standing?)
+  def validates_payment_and_good_standing
+    return true if (valid_payment_method? && in_good_standing?)
     return false
   end
 
@@ -103,11 +103,8 @@ class User < ActiveRecord::Base
   # CLIENT SIDE:
   #   render Braintree::ClientToken.generate(:customer_id => braintree_id)
   #   then use client sdk to communicate with Braintree
-  def has_payment_method?
-    if braintree_id.nil?
-      self.errors[:base] << "User has not added a payment method. Please add a valid payment method."
-      return false
-    end
+  def valid_payment_method?
+    raise NoPaymentMethodException, "User has not added a payment method. Please add a valid payment method." if braintree_id.nil?
     @customer = get_braintree_customer
     # Check if customer has any payment_method
     if @customer.payment_methods.empty?
@@ -116,10 +113,7 @@ class User < ActiveRecord::Base
   end
 
   def in_good_standing?
-    if status != STATUS[:goodstanding]
-      self.errors[:base] << "Users has a status of: #{status}. Please contact us to resolve this issue."
-      return false
-    end
+    raise NoPaymentMethodException, "Users has a status of: #{status}. Please contact us to resolve this issue." if status != STATUS[:goodstanding]
   end
 
   # returns braintree payment_method object or nil
@@ -157,4 +151,9 @@ class User < ActiveRecord::Base
   #   self.network = Network.find_by_domain(domain)
   #   errors[:base] << "Invalid Network" if self.network.nil?
   # end
+
+  class NoPaymentMethodException < Exception
+  end
+  class OutStandingBalanceException < Exception
+  end
 end

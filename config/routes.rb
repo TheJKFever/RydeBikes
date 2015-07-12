@@ -26,8 +26,13 @@ Rails.application.routes.draw do
     post '/bikes/return/:id'  => 'bikes#return'
 
     get 'account/payments/client_token' => 'payments#client_token'
-    resources :payments, path: '/account/payments'
-    resources :transactions, path: '/account/history'
+    get 'account/payments' => 'payments#index', as: 'payments'
+    get 'account/payments/new' => 'payments#new', as: 'new_payment'
+    post 'account/payments' => 'payments#create'
+    # TODO: might need edit/update/delete here for removing cc etc.
+
+    get '/account/history' => 'transactions#index'
+    get '/account/history/:id' => 'transactions#show'
 
     devise_scope :user do
       get  'sign_in',     to: 'devise/sessions#new', as: 'new_user_session'

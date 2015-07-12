@@ -2,6 +2,7 @@
 class Api::ApiController < ApplicationController
   # remove session handling, allowing CSRF for API
   protect_from_forgery with: :null_session
+  skip_before_action :verify_authenticity_token
   # requires Api key to move forward
   skip_before_action :authenticate_user!
   # opens Api to all requests
