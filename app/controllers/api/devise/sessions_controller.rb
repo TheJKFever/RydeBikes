@@ -1,7 +1,9 @@
 require 'warden'
+require 'devise'
 class Api::Devise::SessionsController < Api::ApiController
   skip_before_action :authenticate_apiKey, only: [:new, :create]
   skip_before_action :validate_login_process, only: [:new, :create]
+  before_action :allow_params_authentication!
 
   # POST /api/sign_in
   def create
@@ -18,7 +20,7 @@ class Api::Devise::SessionsController < Api::ApiController
   protected
 
   def auth_options
-    {:scope => resource_name}
+    {:scope => :user}
   end
 
   def translation_scope
