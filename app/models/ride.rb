@@ -1,17 +1,15 @@
 class Ride < ActiveRecord::Base
-	STATUS = {
-		:progress => "in progress",
-		:complete => "complete"
-	}
+
+	enum status: [:complete, :progress]
 
 	validates_presence_of :bike_id, :start_location_id, :start_time
-	validates_presence_of :stop_location_id, :stop_time, if: :status_complete?
+	validates_presence_of :stop_location_id, :stop_time, if: :complete?
 
-	has_one :trans, class_name: "Transaction"
+	has_one    :trans, class_name: 'Transaction'
 	belongs_to :bike
 	belongs_to :user
-	belongs_to :start_location, class_name: 'Coordinate', foreign_key: "start_location_id"
-	belongs_to :stop_location, class_name: 'Coordinate', foreign_key: "stop_location_id"
+	belongs_to :start_location, class_name: 'Coordinate', foreign_key: 'start_location_id'
+	belongs_to :stop_location, class_name: 'Coordinate', foreign_key: 'stop_location_id'
 
 	def self.build_from_user_bike(user, bike)
     new(
@@ -19,12 +17,7 @@ class Ride < ActiveRecord::Base
 	    bike_id: bike.id, 
 	    start_location: bike.location, 
 	    start_time: DateTime.now, 
-	    status: Ride::STATUS[:progress])
-	end
-
-	# this should be put into the validation if
-	def status_complete?
-		return (self.status == STATUS[:complete])
+	    status: statuses[:progress])
 	end
 
 	def calculate_cost

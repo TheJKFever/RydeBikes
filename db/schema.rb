@@ -32,7 +32,7 @@ ActiveRecord::Schema.define(version: 20150211215205) do
   add_index "authentications", ["user_id"], name: "index_authentications_on_user_id"
 
   create_table "bikes", force: :cascade do |t|
-    t.string   "status"
+    t.integer  "status"
     t.integer  "ride_id"
     t.integer  "location_id"
     t.string   "model"
@@ -78,7 +78,7 @@ ActiveRecord::Schema.define(version: 20150211215205) do
     t.integer  "stop_location_id"
     t.datetime "start_time"
     t.datetime "stop_time"
-    t.string   "status"
+    t.integer  "status"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
   end

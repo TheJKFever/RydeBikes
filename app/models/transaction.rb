@@ -1,10 +1,7 @@
 class Transaction < ActiveRecord::Base
-	METHODS = {
-		:subscription => "subscription",
-		:prepay => "prepay",
-		:pay_per_use => "pay_per_use"
-	}
-	
+
+	enum methods: [:pay_per_use, :prepay, :subscription]
+
 	belongs_to :payment
 	belongs_to :user
 	belongs_to :ride
@@ -19,13 +16,15 @@ class Transaction < ActiveRecord::Base
 			user: user, 
 			ride: ride, 
 			amount: ride.calculate_cost,
-			payment_id: (User.get_default_payment_method).token
+			payment_id: (User.get_default_payment_method(user)).token
 		)
+
+		# Do Transaction Here
 
 		@transaction.payment_type = response.payment_instrument_type
 		@transaction.status = response.status
 		@transaction.details = response
-
+		@transaction.save!
 	end
 
 	class Rejected < Exception

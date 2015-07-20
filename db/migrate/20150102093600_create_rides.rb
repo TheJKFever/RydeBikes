@@ -7,7 +7,7 @@ class CreateRides < ActiveRecord::Migration
       t.integer :stop_location_id
       t.datetime :start_time
       t.datetime :stop_time
-      t.string :status
+      t.integer :status
       t.timestamps null: false
     end
     add_index :rides, :user_id

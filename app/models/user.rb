@@ -9,12 +9,14 @@ class User < ActiveRecord::Base
 
   attr_accessor :login
 
+  belongs_to :network
   belongs_to :address
   has_many :authentications
   has_many :intersts
   has_many :rides
-  has_many :trans, class_name: "Transactions"
+  has_many :trans, class_name: 'Transactions'
 
+  validates_presence_of :status
   validates :username,
     :presence => true,
     :uniqueness => {
@@ -77,8 +79,6 @@ class User < ActiveRecord::Base
     return true
   end
 
-  private
-
   def serializable_hash(options={})
     super({ :only => [:id, :name, :phone, :email, :picture, :access_token]}.merge(options || {}))
   end
@@ -128,13 +128,11 @@ class User < ActiveRecord::Base
 
   # returns braintree customer object or nil
   def get_braintree_customer
-    begin
-      return Braintree::Customer.find(braintree_id)
-    rescue Braintree::NotFoundError
-      update_attributes(:braintree_id => nil)
-      self.errors[:base] << "Invalid Braintree token. Please update payment methods."
-      return nil
-    end
+    return Braintree::Customer.find(braintree_id)
+  rescue Braintree::NotFoundError
+    update_attributes(:braintree_id => nil)
+    self.errors[:base] << "Invalid Braintree token. Please update payment methods."
+    return nil
   end
 
   # def valid_email

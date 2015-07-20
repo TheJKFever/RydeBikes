@@ -11,7 +11,7 @@ class Api::BikesController < Api::ApiController
     # coordinates = params[:coordinates] ? params[:coordinates] : request.location
     # puts coordinates
     # @bikes = Coordinate.near(coordinates, radius).joins(:bikes)
-    @bikes = Bike.where(status: Bike::STATUS[:available])
+    @bikes = Bike.available
     render json: @bikes
   end
 
@@ -21,42 +21,42 @@ class Api::BikesController < Api::ApiController
   # Expected params:
   #   X-Api-Key: api_key
   #   id: bike_id
-    def reserve # Start Ride
-      return render json: { error: "This bike is not available to reserve" }, status: :forbidden if @bike.status != Bike::STATUS[:available]
-      begin
-        ActiveRecord::Base.transaction do
-          @bike.status = Bike::STATUS[:reserved]
-          @bike.current_ride = Ride.build_from_user_bike(@user, @bike)
-          # Check payment
-          payment_type = params[:payment_type]
-          if payment_type === Transaction::METHODS[:subscription]
-            raise ActiveRecord::Rollback
-            return render json: { error: "Subscription has not been implemented yet" }, status: :bad_request
-          else
-            @user.validates_payment_and_good_standing
-            if payment_type === Transaction::METHODS[:prepay]
-              @bike.current_ride.trans = Transaction.charge_user_for_ride(@user, @bike.current_ride, payment_type)
-            else # :per_minute
-              # put pay_per_minute logic here
-            end
+  def reserve # Start Ride
+    return render json: { error: "This bike is not available to reserve" }, status: :forbidden unless @bike.available?
+    begin
+      ActiveRecord::Base.transaction do
+        @bike.status = Bike.statuses[:reserved]
+        @bike.current_ride = Ride.build_from_user_bike(@user, @bike)
+        # Check payment
+        payment_type = params[:payment_type]
+        if payment_type === "subscription"
+          raise ActiveRecord::Rollback
+          return render json: { error: "Subscription has not been implemented yet" }, status: :bad_request
+        else
+          @user.validates_payment_and_good_standing
+          if payment_type === "prepay"
+            @bike.current_ride.trans = Transaction.charge_user_for_ride(@user, @bike.current_ride, payment_type)
+          else # :per_minute
+            # put pay_per_minute logic here
           end
-          @bike.save!
         end
-      rescue User::NoPaymentMethodException => exception
-        render json: { error: exception.message }, 
-          status: :payment_required, 
-          location: api_new_payment_path
-      rescue User::OutStandingBalanceException => exception
-        render json: { error: exception.message }, 
-          status: :forbidden, 
-          location: api_collections_path
-      rescue ActiveRecord::RecordInvalid => exception
-        render :json => { :error => exception.message }, status: :unprocessable_entity
-      rescue Transaction::Rejected => error
-      else
-        render json: {bike: @bike, transction: @bike.current_ride.trans}
+        @bike.save!
       end
+    rescue User::NoPaymentMethodException => exception
+      render json: { error: exception.message }, 
+        status: :payment_required, 
+        location: api_new_payment_path
+    rescue User::OutStandingBalanceException => exception
+      render json: { error: exception.message }, 
+        status: :forbidden, 
+        location: api_collections_path
+    rescue ActiveRecord::RecordInvalid => exception
+      render :json => { :error => exception.message }, status: :unprocessable_entity
+    rescue Transaction::Rejected => error
+    else
+      render json: {bike: @bike, transction: @bike.current_ride.trans}
     end
+  end
 
   # Expected params:
   #   X-Api-Key: api_key
@@ -68,7 +68,7 @@ class Api::BikesController < Api::ApiController
     @ride = @bike.current_ride
     render json: { error: 'Could not find the current ride associated with this bike' }, status: :not_found if @ride.nil?
     render json: { error: 'Cannot return a bike that is not reserved' }, 
-      status: :forbidden if (@bike.status != Bike::STATUS[:reserved])
+      status: :forbidden unless (@bike.reserved?)
     render json: { error: 'You are not the current owner of this bike' }, 
       status: :forbidden if (@user != @ride.user)
 
@@ -78,7 +78,7 @@ class Api::BikesController < Api::ApiController
     
     @ride.stop_location = @location, 
     @ride.stop_time = DateTime.now, 
-    @ride.status = Ride::STATUS[:complete]
+    @ride.status = Ride.statuses[:complete]
     render :json => { :error => @ride.errors.full_messages } unless @ride.save
 
     # CHARGE FOR RIDE
@@ -92,7 +92,7 @@ class Api::BikesController < Api::ApiController
       # TODO: What happens if transaction fails
       # @user.status === User::STATUS[:outstanding]
     else
-      @bike.status = Bike::STATUS[:available]
+      @bike.status = Bike.statuses[:available]
     ensure
       @bike.location = @location
       @bike.current_ride = nil
