@@ -2,6 +2,7 @@ class BikesController < ApplicationController
   before_action :authenticate_user!
 	before_action :authenticate_admin!, except: [:index, :show, :reserve]
   before_action :set_bike, except: [:index, :create, :new]
+  skip_before_action :validate_login_process, only: [:tutorial] 
 
   # AVAILABLE TO USERS
 

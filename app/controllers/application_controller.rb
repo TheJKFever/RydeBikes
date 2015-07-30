@@ -33,8 +33,8 @@ class ApplicationController < ActionController::Base
     path, error = validate_login_process_for(current_user)
     if (error)
       respond_to do |format|
-        format.html redirect_to path, :alert => error
-        format.json render json: { error: error }, status: :unauthorized,  location: path
+        format.html { redirect_to path, :alert => error }
+        format.json { render json: { error: error }, status: :unauthorized,  location: path }
       end
     end
   end
@@ -50,7 +50,7 @@ class ApplicationController < ActionController::Base
   # returns path, error
   def validate_login_process_for(user)
     return edit_basic_profile_path(user), "Please provide the requied profile information" if !user.has_basic_profile_info?
-    return first_login_path, "Please complete the first login tutorial" if first_time_login == true
+    return first_login_path, "Please complete the first login tutorial" if user.first_time_login == true
     return home_path, nil
   end
 end
