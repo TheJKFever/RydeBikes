@@ -7,6 +7,8 @@ class User < ActiveRecord::Base
   # :lockable, :timeoutable, :confirmable, :validatable
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :omniauthable
 
+  after_initialize :init
+
   attr_accessor :login
 
   belongs_to :network
@@ -34,6 +36,10 @@ class User < ActiveRecord::Base
   # validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i, 
     # :message => "email must end in .edu", :unless => :admin
   # validate :validate_network, :unless => :admin
+
+  def init
+    self.status ||= STATUS[:goodstanding]
+  end
 
   def generate_new_api_key
     begin
@@ -104,16 +110,14 @@ class User < ActiveRecord::Base
   #   render Braintree::ClientToken.generate(:customer_id => braintree_id)
   #   then use client sdk to communicate with Braintree
   def valid_payment_method?
-    raise NoPaymentMethodException, "User has not added a payment method. Please add a valid payment method." if braintree_id.nil?
+    raise PaymentMethodException, "User has not added a payment method. Please add a valid payment method." if braintree_id.nil?
     @customer = get_braintree_customer
     # Check if customer has any payment_method
-    if @customer.payment_methods.empty?
-      return render json: { error: 'Braintree customer account created, but no payment added. Please add a valid payment method.'}, status: :unauthorized
-    end
+    raise PaymentMethodException, 'Braintree customer account created, but no payment added. Please add a valid payment method.' if @customer.payment_methods.empty?
   end
 
   def in_good_standing?
-    raise NoPaymentMethodException, "Users has a status of: #{status}. Please contact us to resolve this issue." if status != STATUS[:goodstanding]
+    raise NotInGoodStandingException, "Users has a status of: #{status}. Please contact us to resolve this issue." if status != STATUS[:goodstanding]
   end
 
   # returns braintree payment_method object or nil
@@ -129,10 +133,9 @@ class User < ActiveRecord::Base
   # returns braintree customer object or nil
   def get_braintree_customer
     return Braintree::Customer.find(braintree_id)
-  rescue Braintree::NotFoundError
+  rescue Braintree::NotFoundError => e
     update_attributes(:braintree_id => nil)
-    self.errors[:base] << "Invalid Braintree token. Please update payment methods."
-    return nil
+    raise BraintreeException, "Invalid Braintree token. Please update payment methods."
   end
 
   # def valid_email
@@ -150,8 +153,10 @@ class User < ActiveRecord::Base
   #   errors[:base] << "Invalid Network" if self.network.nil?
   # end
 
-  class NoPaymentMethodException < Exception
+  class BraintreeException < Exception
   end
-  class OutStandingBalanceException < Exception
+  class PaymentMethodException < Exception
+  end
+  class NotInGoodStandingException < Exception
   end
 end

@@ -30,8 +30,8 @@ class Api::BikesController < Api::ApiController
         # Check payment
         payment_type = params[:payment_type]
         if payment_type === "subscription"
+          render json: { error: "Subscription has not been implemented yet" }, status: :bad_request
           raise ActiveRecord::Rollback
-          return render json: { error: "Subscription has not been implemented yet" }, status: :bad_request
         else
           @user.validates_payment_and_good_standing
           if payment_type === "prepay"
@@ -42,17 +42,20 @@ class Api::BikesController < Api::ApiController
         end
         @bike.save!
       end
-    rescue User::NoPaymentMethodException => exception
-      render json: { error: exception.message }, 
+    rescue User::PaymentMethodException, User::BraintreeException => e
+      render json: { error: e.message }, 
         status: :payment_required, 
         location: api_new_payment_path
-    rescue User::OutStandingBalanceException => exception
-      render json: { error: exception.message }, 
+    rescue User::NotInGoodStandingException => e
+      render json: { error: e.message }, 
         status: :forbidden, 
         location: api_collections_path
-    rescue ActiveRecord::RecordInvalid => exception
-      render :json => { :error => exception.message }, status: :unprocessable_entity
-    rescue Transaction::Rejected => error
+    rescue ActiveRecord::RecordInvalid => e
+      render :json => { :error => e.message }, 
+        status: :unprocessable_entity
+    rescue Transaction::Rejected => e
+      render :json => { :error => e.message }, 
+        status: :bad_request
     else
       render json: {bike: @bike, transction: @bike.current_ride.trans}
     end

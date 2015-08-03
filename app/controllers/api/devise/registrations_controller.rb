@@ -6,6 +6,7 @@ class Api::Devise::RegistrationsController < Api::ApiController
   def create
     user = User.new(sign_up_params)
     user.save
+    byebug
     if user.persisted?
       # if user.active_for_authentication?
         user.generate_new_api_key
@@ -17,8 +18,7 @@ class Api::Devise::RegistrationsController < Api::ApiController
       #   render json: { error: message, user: resource }, location: after_inactive_sign_up_path_for(resource)
       # end
     else
-      clean_up_passwords resource
-      set_minimum_password_length
+      user.password = nil
       render json: { error: user.errors }, status: :unprocessable_entity
     end
   end
@@ -34,7 +34,7 @@ class Api::Devise::RegistrationsController < Api::ApiController
       sign_in @user, bypass: true
       render json: { user: @user }, location: after_update_path_for(@user)
     else
-      clean_up_passwords @user
+      @user.password = nil
       render json: { error: @user.errors }, status: :unprocessable_entity
     end
   end
