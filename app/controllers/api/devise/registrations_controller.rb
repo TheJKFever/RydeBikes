@@ -6,7 +6,6 @@ class Api::Devise::RegistrationsController < Api::ApiController
   def create
     user = User.new(sign_up_params)
     user.save
-    byebug
     if user.persisted?
       # if user.active_for_authentication?
         user.generate_new_api_key
