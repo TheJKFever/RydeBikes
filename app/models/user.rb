@@ -117,7 +117,11 @@ class User < ActiveRecord::Base
   end
 
   def in_good_standing?
-    raise NotInGoodStandingException, "Users has a status of: #{status}. Please contact us to resolve this issue." if status != STATUS[:goodstanding]
+    if status != STATUS[:goodstanding]
+      raise NotInGoodStandingException, "Users has a status of: #{status}. Please contact us to resolve this issue." 
+    else
+      return true
+    end
   end
 
   # returns braintree payment_method object or nil
