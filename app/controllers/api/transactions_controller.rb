@@ -17,22 +17,26 @@ class Api::TransactionsController < Api::ApiController
 
 	def new
 		@braintree_token = generate_client_token
-		@transaction = Tr€ansaction.new
+		@transaction = Transaction.new
 		render json: @transaction
 	end
 
 	def create
-	    @result = Braintree::Transaction.sale(
-	              amount: current_user.cart_total_price,
-	              payment_method_nonce: params[:payment_method_nonce])
-	    if @result.success?
-	      current_user.purchase_cart_movies!
-	      redirect_to root_url, notice: "Congraulations! Your transaction has been successfully!"
-	    else
-	      flash[:alert] = "Something went wrong while processing your transaction. Please try again!"
-	      gon.client_token = generate_client_token
-	      render :new
-	    end
+		transaction = transaction_params
+		if params[:payment_method_nonce].present?
+			transaction.merge({ payment_method_nonce: params[:payment_method_nonce] })
+		else
+			transaction.merge({ payment_method_token: @user.get_default_payment_method.token })
+		end
+    @result = Braintree::Transaction.sale(transaction)
+    if @result.success?
+      current_user.purchase_cart_movies!
+      redirect_to root_url, notice: "Congraulations! Your transaction has been successfully!"
+    else
+      flash[:alert] = "Something went wrong while processing your transaction. Please try again!"
+      gon.client_token = generate_client_token
+      render :new
+    end
 	end
 
 	# def create

@@ -114,14 +114,13 @@ class User < ActiveRecord::Base
     @customer = get_braintree_customer
     # Check if customer has any payment_method
     raise PaymentMethodException, 'Braintree customer account created, but no payment added. Please add a valid payment method.' if @customer.payment_methods.empty?
+    return true
   end
 
   def in_good_standing?
-    if status != STATUS[:goodstanding]
+    status != STATUS[:goodstanding]
       raise NotInGoodStandingException, "Users has a status of: #{status}. Please contact us to resolve this issue." 
-    else
-      return true
-    end
+    return true
   end
 
   # returns braintree payment_method object or nil
