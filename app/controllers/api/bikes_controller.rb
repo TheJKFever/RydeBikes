@@ -54,7 +54,7 @@ class Api::BikesController < Api::ApiController
       render :json => { :error => e.message }, 
         status: :bad_request
     else
-      render json: {bike: @bike, transction: @bike.current_ride.trans}
+      render json: {bike: @bike.to_json({methods: :code}), transction: @bike.current_ride.trans}
     end
   end
 
@@ -69,10 +69,8 @@ class Api::BikesController < Api::ApiController
     params.require(:longitude)
     @ride = @bike.current_ride
     return render json: { error: 'Could not find the current ride associated with this bike' }, status: :not_found if @ride.nil?
-    return render json: { error: 'Cannot return a bike that is not reserved' }, 
-      status: :forbidden unless (@bike.reserved?)
-    return render json: { error: 'You are not the current owner of this bike' }, 
-      status: :forbidden if (@user != @ride.user)
+    return render json: { error: 'Cannot return a bike that is not reserved' }, status: :forbidden unless (@bike.reserved?)
+    return render json: { error: 'You are not the current owner of this bike' }, status: :forbidden if (@user != @ride.user)
 
     # TODO: get name for this location by nearest Coordinate with name...
     @location = Coordinate.find_or_initialize_by(latitude: params[:latitude], longitude: params[:longitude])
@@ -86,18 +84,17 @@ class Api::BikesController < Api::ApiController
     # CHARGE FOR RIDE
     begin
       # TODO: Finish this
-      @transaction = Transaction.charge_user_for_ride(@user, @ride)
-      @transaction.save!
+      # @transaction = Transaction.charge_user_for_ride(@user, @ride)
+      # @transaction.save!
     # put specific rescues here
     rescue Exception => e
       return render json: { error: e }, status: :internal_server_error
       # TODO: What happens if transaction fails
       # @user.status === User::STATUS[:outstanding]
-    else
-      @bike.status = Bike.statuses[:available]
     ensure
       @bike.location = @location
       @bike.current_ride = nil
+      @bike.status = Bike.statuses[:available]
       return render json: { error: @bike.errors.full_messages } unless @bike.save
     end
     # TODO: make this @ride.summary

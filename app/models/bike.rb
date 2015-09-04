@@ -10,7 +10,10 @@ class Bike < ActiveRecord::Base
 	validates_presence_of :status, :network
 	validates_presence_of :current_ride, :if => :reserved?
 
-	def as_json(options={})
-		super(:only => [:id, :status, :model], :include => {:location => {:only => [:name, :full_address, :latitude, :longitude]}})
+	def serializable_hash(options={})
+		options = {
+			:only => [:id, :status, :model], :include => {:location => {:only => [:name, :full_address, :latitude, :longitude]}}
+		}.update(options)
+		super(options)
 	end
 end
