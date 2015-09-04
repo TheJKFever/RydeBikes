@@ -5,6 +5,11 @@ class Api::Devise::RegistrationsController < Api::ApiController
   # POST /api/sign_up
   def create
     user = User.new(sign_up_params)
+
+    # TODO: Remove This
+    # CHECK INITIAL BETA TEST SIGN UP SHEET
+    user.status = User::STATUS[:goodstanding] if Rails.application.config.beta_members.include?(user.username)
+
     user.save
     if user.persisted?
       # if user.active_for_authentication?
@@ -68,6 +73,7 @@ class Api::Devise::RegistrationsController < Api::ApiController
   # in your own RegistrationsController.
   def after_sign_up_path_for(resource)
     # TODO: change this for get_basic_user_info
+    return "https://squareup.com/market/ryde-bikes" if resource.status == User::STATUS[:unpaid]
     after_sign_in_path_for(resource)
   end
 

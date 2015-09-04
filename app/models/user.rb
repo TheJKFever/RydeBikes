@@ -1,7 +1,8 @@
 class User < ActiveRecord::Base
   STATUS = {
     :outstanding => 'Outstanding balance',
-    :goodstanding => 'In good standing'
+    :goodstanding => 'In good standing',
+    :unpaid => 'User has not paid'
   }
 
   # :lockable, :timeoutable, :confirmable, :validatable
@@ -38,7 +39,7 @@ class User < ActiveRecord::Base
   # validate :validate_network, :unless => :admin
 
   def init
-    self.status ||= STATUS[:goodstanding]
+    self.status ||= STATUS[:unpaid]
   end
 
   def generate_new_api_key
@@ -86,7 +87,7 @@ class User < ActiveRecord::Base
   end
 
   def serializable_hash(options={})
-    super({ :only => [:id, :name, :phone, :email, :picture, :access_token]}.merge(options || {}))
+    super({ :only => [:id, :name, :phone, :email, :picture, :access_token, :status]}.merge(options || {}))
   end
 
   # NOT BEING USED ANYWHWERE...
