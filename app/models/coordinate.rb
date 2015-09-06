@@ -9,8 +9,8 @@ class Coordinate < ActiveRecord::Base
 	has_one :bike, foreign_key: "location_id"
 	has_one :interest
 
-	after_validation :geocode          # auto-fetch coordinates
-	geocoded_by :full_address
+	# after_validation :geocode          # auto-fetch coordinates
+	# geocoded_by :full_address
 
 	# reverse_geocoded_by :latitude, :longitude
 	# after_validation :reverse_geocode, address: :full_address  # auto-fetch address

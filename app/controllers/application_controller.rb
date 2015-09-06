@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   # Consider making this into one because one doesn't work without the other
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
-  before_action :validate_login_process, unless: :devise_controller?
+  # before_action :validate_login_process, unless: :devise_controller?
 
   respond_to :json, :html
 
@@ -20,8 +20,8 @@ class ApplicationController < ActionController::Base
   def authenticate_admin!
     if !current_user || !current_user.admin?
       respond_to do |format|
-        format.html redirect_to root_path, :alert => 'Must have administrative priviledges'
-        format.json render json: { error: 'Must have administrative priviledges' }, status: :unauthorized, location: root_path
+        format.html { redirect_to root_path, :alert => 'Must have administrative priviledges' }
+        format.json { render json: { error: 'Must have administrative priviledges' }, status: :unauthorized, location: root_path }
       end
     end
   end

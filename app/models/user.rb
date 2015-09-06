@@ -5,8 +5,8 @@ class User < ActiveRecord::Base
     :unpaid => 'User has not paid'
   }
 
-  # :lockable, :timeoutable, :confirmable, :validatable
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :omniauthable
+  # :lockable, :timeoutable, :confirmable
+  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :omniauthable, :validatable
 
   after_initialize :init
 
@@ -25,18 +25,21 @@ class User < ActiveRecord::Base
     :uniqueness => {
       :case_sensitive => false
     }
+
   # validates_confirmation_of :password, :if => :password_required?
-  # validates_length_of :password, :within => password_length, :allow_blank => true
-  validates_uniqueness_of :email, allow_blank: true, if: :email_changed?
+  validates_length_of :password, :within => password_length, :allow_blank => true
+  # validates_uniqueness_of :email, allow_blank: true, if: :email_changed?
   # validates_format_of     :email, with: Devise.config.email_regexp, allow_blank: true, if: :email_changed?
   # validates_presence_of :password, :if => :password_required?
-  # validates_confirmation_of :password, :if => :password_required?
   # validates_length_of :password, :within => password_length, :allow_blank => true
-
   # Validates university email
   # validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+edu)\z/i, 
     # :message => "email must end in .edu", :unless => :admin
   # validate :validate_network, :unless => :admin
+
+  def email_required?
+    false
+  end
 
   def init
     self.status ||= STATUS[:unpaid]

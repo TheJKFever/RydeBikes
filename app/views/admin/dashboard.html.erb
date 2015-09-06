@@ -1,0 +1,27 @@
+<h1>Admin Dashboard</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Bike ID</th>
+      <th>Last User</th>
+      <th colspan="1">Combo</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @bikes.each do |bike| %>
+      <tr>
+        <td><%= bike.id %></td>
+        <td><%= bike.rides.order(stop_time: :desc).first.user.username %></td>
+        <td><%= bike.code %></td>
+        <td><%= link_to 'Edit', edit_bike_path(bike) %></td>
+        <td><%= link_to 'Delete', bike, method: :delete, data: { confirm: 'Are you sure you want to delete this bike?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Bike', new_bike_path %>
