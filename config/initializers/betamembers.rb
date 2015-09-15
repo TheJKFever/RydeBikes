@@ -1,3 +1,24 @@
 Rails.application.config.beta_members = [
-  "jkoehmst@usc.edu"
+  "connormi@usc.edu",
+  "jaewoonj@usc.edu",
+  "shaoruyin@hotmail.com",
+  "cvaliente56@gmail.com",
+  "uppala@usc.edu",
+  "jchabonbon@gmail.com",
+  "andreawr@usc.edu",
+  "jamespoc@usc.edu",
+  "chengge@usc.edu",
+  "varnika127@gmail.com",
+  "malakmossadek@gmail.com",
+  "cheukloh@usc.edu",
+  "awada@usc.edu",
+  "abethea@usc.edu",
+  "sabdella@usc.edu",
+  "yangzigu@usc.edu",
+  "cindyy@usc.edu",
+  "danwar@usc.edu",
+  "justinleecatchings@yahoo.com",
+  "kdsulliv@usc.edu",
+  "victorjiefu@gmail.com",
+  "amelnik@usc.edu"
 ]
