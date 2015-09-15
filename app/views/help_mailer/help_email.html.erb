@@ -1,0 +1,19 @@
+<h1>Quick ryde user <%= @user.username %> needs help!!!!</h1>
+
+<h3>Help Category:</h3> 
+<p><%= @Category %></p>
+
+<h3>Help sub-category:</h3> 
+<p><%= @subcategory %></p>
+
+<h3>User Info:</h3>
+<p>
+  Username: <%= @user.username %>
+  Name: <%= @user.name %>
+  Email: <%= @user.email %>
+</p>
+
+<h3>Most Recent Ryde:</h3>
+<p>
+  <%= @user.rides.last %>
+</p>

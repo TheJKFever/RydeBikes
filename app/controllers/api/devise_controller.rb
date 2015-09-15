@@ -3,7 +3,6 @@ class Api::DeviseController < Api::ApiController
   include Devise::Controllers::ScopedViews
 
   helper DeviseHelper
-
   helpers = %w(resource scope_name resource_name signed_in_resource
                resource_class resource_params devise_mapping)
   helper_method(*helpers)
@@ -147,10 +146,12 @@ MESSAGE
   # available.
   def set_flash_message(key, kind, options = {})
     message = find_message(kind, options)
-    if options[:now]
-      flash.now[key] = message if message.present?
-    else
-      flash[key] = message if message.present?
+    if message.present?
+      if options[:now]
+        flash.now[key] = message
+      else
+        flash[key] = message
+      end
     end
   end
 

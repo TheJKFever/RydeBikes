@@ -27,6 +27,15 @@ class Api::ApiController < ApplicationController
     render json: { error: error }, status: :unauthorized,  location: '/api' +path if error.present?
   end
 
+  def help
+    category = params.require(:help).permit(:category)
+    subcategory = params.require(:help).permit(:subcategory)
+    message = params.require(:help).permit(:message)
+    # send email to admin with category, subject, message, and user info
+    # render mailers->help_mailer#help_email(category, subcategory, message, @user)
+    HelpMailer.help_email(category, subcategory, message, @user).deliver_now
+  end
+
   protected
 
   ## DANGER PLEASE READ

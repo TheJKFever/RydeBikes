@@ -41,6 +41,7 @@ Rails.application.routes.draw do
       post 'sign_up',     to: 'devise/registrations#create', as: 'user_registration'
     end
 
+    post 'help' => 'api#help', as: 'help'
     get 'bikes/:id/pulse' => 'bikes#pulse'
   end
 

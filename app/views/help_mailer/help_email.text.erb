@@ -1,0 +1,13 @@
+Quick ryde user <%= @user.username %> needs help!!!!
+====================================================
+
+Help Category: <%= @Category %>
+Help sub-category: <%= @subcategory %>
+
+User Info:
+  Username: <%= @user.username %>
+  Name: <%= @user.name %>
+  Email: <%= @user.email %>
+
+Most Recent Ryde:
+  <%= @user.rides.last %>
