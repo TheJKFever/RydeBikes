@@ -9,7 +9,6 @@ Rails.application.config.beta_members = [
   "jamespoc@usc.edu",
   "chengge@usc.edu",
   "varnika127@gmail.com",
-  "malakmossadek@gmail.com",
   "cheukloh@usc.edu",
   "awada@usc.edu",
   "abethea@usc.edu",
@@ -20,5 +19,12 @@ Rails.application.config.beta_members = [
   "justinleecatchings@yahoo.com",
   "kdsulliv@usc.edu",
   "victorjiefu@gmail.com",
-  "amelnik@usc.edu"
-]
+  "amelnik@usc.edu",
+  "tsengj@usc.edu",
+  "grayt@usc.edu",
+  "nassarha@usc.edu",
+  "yitings@usc.edu",
+  "pphou@usc.edu",
+  "jsocha@usc.edu",
+  "nicholbs@usc.edu",
+  "glarencez@gmail.com"]
