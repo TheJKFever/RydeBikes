@@ -34,6 +34,7 @@ class Api::ApiController < ApplicationController
     # send email to admin with category, subject, message, and user info
     # render mailers->help_mailer#help_email(category, subcategory, message, @user)
     HelpMailer.help_email(category, subcategory, message, @user).deliver_now
+    render json: { success: "sent email"}, status: :ok
   end
 
   protected
