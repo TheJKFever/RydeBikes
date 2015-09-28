@@ -45,7 +45,7 @@ Rails.application.routes.draw do
     get 'bikes/:id/pulse' => 'bikes#pulse'
   end
 
-  namespace :admin do
+  scope :admin do
     get '/dashboard' => 'admin#dashboard'
   end
 

@@ -6,7 +6,7 @@ class HelpMailer < ApplicationMailer
     @subcategory = subcategory
     @message = message
     @user = user
-    mail(to: "help@rydebikes.com", subject: "Help request from Ryde user: #{user.username}")
+    mail(to: "info@rydebikes.com", subject: "Help request from Ryde user: #{user.username}")
   end  
 
 end
