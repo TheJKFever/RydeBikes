@@ -1,5 +1,6 @@
 Rails.application.config.beta_members = [
   "connormi@usc.edu",
+  "1996pjy@gmail.com",
   "jaewoonj@usc.edu",
   "shaoruyin@hotmail.com",
   "cvaliente56@gmail.com",
@@ -28,4 +29,5 @@ Rails.application.config.beta_members = [
   "jsocha@usc.edu",
   "nicholbs@usc.edu",
   "glarencez@gmail.com",
+  "yangzigu@usc.edu",
   "amarla@usc.edu"]
