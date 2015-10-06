@@ -1,5 +1,5 @@
 class Bike < ActiveRecord::Base
-	enum status: [:available, :reserved]
+	enum status: [:available, :reserved, :off]
 
 	has_many :rides
 	belongs_to :network
