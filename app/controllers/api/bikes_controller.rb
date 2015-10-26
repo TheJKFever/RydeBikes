@@ -41,8 +41,8 @@ class Api::BikesController < Api::ApiController
 
         print "Reserved Bike #{@bike.id} - scheduling bike-reserved-email"
         puts Time.now
-        minutes = 10
-        delay = "#{minutes}s"
+        minutes = 5
+        delay = "#{minutes}m"
         Rufus::Scheduler.singleton.in delay do
           if (Ride.find(@bike.current_ride.id).progress?)
             ApplicationMailer.bikes_been_reserved_for(minutes, @user, @bike.id).deliver_now

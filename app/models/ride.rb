@@ -38,8 +38,8 @@ class Ride < ActiveRecord::Base
 			:only => [:id, :bike_id, :start_time, :stop_time, :status, :transaction_id], 
 			:include => {
 				:user => {:only => [:name, :email]}, 
-				:start_location => {:only => [:name]}, 
-				:stop_location => {:only => [:name]}
+				:start_location => {:only => [:name, :latitude, :longitude]}, 
+				:stop_location => {:only => [:name, :latitude, :longitude]}
 			}
 		}.merge(options || {}))
 	end
