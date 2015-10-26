@@ -38,6 +38,19 @@ class Api::BikesController < Api::ApiController
           # put pay_per_minute logic here
         end
         @bike.save!
+
+        print "Reserved Bike #{@bike.id} - scheduling bike-reserved-email"
+        puts Time.now
+        minutes = 10
+        delay = "#{minutes}s"
+        Rufus::Scheduler.singleton.in delay do
+          if (Ride.find(@bike.current_ride.id).progress?)
+            ApplicationMailer.bikes_been_reserved_for(minutes, @user, @bike.id).deliver_now
+            print "Sent email "
+            puts Time.now
+          end
+        end
+
       end
     rescue User::PaymentMethodException, User::BraintreeException => e
       render json: { error: e.message }, 

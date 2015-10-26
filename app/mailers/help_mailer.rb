@@ -6,7 +6,10 @@ class HelpMailer < ApplicationMailer
     @subcategory = subcategory
     @message = message
     @user = user
-    mail(to: "info@rydebikes.com", subject: "Help request from Ryde user: #{user.username}")
+    email = "info@rydebikes.com"
+    subject = "Help request from Ryde user: #{user.username}"
+    mail(to: email, subject: subject)
+    Rails.logger.info "Sent help_email email to #{email}"
   end  
 
 end
