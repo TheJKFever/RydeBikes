@@ -33,4 +33,5 @@ Rails.application.config.beta_members = [
   "amarla@usc.edu",
   "499511@qq.com",
   "angadgolf@yahoo.co.in",
-  "akaribya@usc.edu"]
+  "akaribya@usc.edu",
+  "anagnost@usc.edu"]
