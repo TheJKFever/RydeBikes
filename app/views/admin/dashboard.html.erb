@@ -21,6 +21,7 @@
         <td><%= bike.rides.order(stop_time: :desc).first.nil? ? "No rides yet" : bike.rides.order(stop_time: :desc).first.user.username %></td>
         <td><%= bike.status %></td>
         <td><%= bike.code %></td>
+        <td><%= link_to 'Release', admin_release_bike_path(bike.id), method: :post%></td>
         <td><%= link_to 'Edit', edit_bike_path(bike) %></td>
         <td><%= link_to 'Delete', bike, method: :delete, data: { confirm: 'Are you sure you want to delete this bike?' } %></td>
       </tr>
