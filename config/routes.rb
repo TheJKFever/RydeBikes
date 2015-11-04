@@ -46,7 +46,8 @@ Rails.application.routes.draw do
   end
 
   scope :admin do
-    get '/dashboard' => 'admin#dashboard'
+    get '/dashboard' => 'admin#dashboard', as: 'admin_dashboard'
+    post '/bikes/release/:id' => 'admin#release', as: 'admin_release_bike'
   end
 
   # The priority is based upon order of creation: first created -> highest priority.
