@@ -21,7 +21,7 @@ class AdminController < ApplicationController
     @ride.status = Ride.statuses[:complete]
     return render :json => { :error => @ride.errors.full_messages } unless @ride.save
 
-    @bike.location = @location
+    @bike.location = @ride.start_location
     @bike.current_ride = nil
     @bike.status = Bike.statuses[:available]
     return render json: { error: @bike.errors.full_messages } unless @bike.save
